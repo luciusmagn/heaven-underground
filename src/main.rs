@@ -11,6 +11,9 @@ static PROFONT: &[u8] = include_bytes!("./ProFontExtended.ttf");
 mod keys;
 use keys::DisplayKey;
 
+pub mod state;
+//use state::MyGame;
+
 fn main() -> Result<()> {
     MyGame::run(WindowSettings {
         title: String::from("A caffeinated game"),
@@ -51,7 +54,6 @@ impl Game for MyGame {
     type LoadingScreen = (); // No loading screen
 
     fn load(_window: &Window) -> Task<MyGame> {
-        // Load your game assets here. Check out the `load` module!
         Task::succeed(|| MyGame { blinker: false, tick_count: 0, text_buffer: String::new() })
     }
 
@@ -79,7 +81,6 @@ impl Game for MyGame {
     }
 
     fn draw(&mut self, frame: &mut Frame, _timer: &Timer) {
-        // Clear the current frame
         frame.clear(Color::BLACK);
 
 		let mut f = Font::from_bytes(frame.gpu(), &PROFONT).unwrap();
@@ -91,7 +92,5 @@ impl Game for MyGame {
 
         let mut target = frame.as_target();
 		f.draw(&mut target);
-
-        // Draw your game here. Check out the `graphics` module!
     }
 }

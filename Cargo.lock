@@ -188,6 +188,7 @@ name = "coffee_test"
 version = "0.1.0"
 dependencies = [
  "coffee",
+ "either",
 ]
 
 [[package]]
