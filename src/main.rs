@@ -1,9 +1,15 @@
 use coffee::graphics::{Color, Frame, Window, WindowSettings, Text, Font, Point, HorizontalAlignment, VerticalAlignment};
 use coffee::load::Task;
 use coffee::input::KeyboardAndMouse;
+use coffee::input::keyboard::KeyCode;
 use coffee::{Game, Result, Timer};
 
+use std::cmp;
+
 static PROFONT: &[u8] = include_bytes!("./ProFontExtended.ttf");
+
+mod keys;
+use keys::DisplayKey;
 
 fn main() -> Result<()> {
     MyGame::run(WindowSettings {
@@ -34,7 +40,7 @@ fn make_text<'a>(src: &'a str, pos: Point, size: f32) -> Text<'a> {
 		position: pos,
 		size: size,
 		color: Color::WHITE,
-		bounds: (200.0, 200.0),
+		bounds: (600.0, 600.0),
 		horizontal_alignment: HorizontalAlignment::Left,
 		vertical_alignment: VerticalAlignment::Top,
 	}
@@ -51,7 +57,16 @@ impl Game for MyGame {
 
     fn interact(&mut self, input: &mut Self::Input, _window: &mut Window) {
 	    let kb = input.keyboard();
-	    
+
+	    let input_string = kb.released_keys.iter()
+	    	.map(|x| x.to_printable())
+	    	.collect::<String>();
+
+		self.text_buffer = format!("{}{}", self.text_buffer, input_string);
+
+		if kb.released_keys.contains(&KeyCode::Back) {
+			self.text_buffer = self.text_buffer[..cmp::max(self.text_buffer.len()-1, 0)].to_string();
+		}
     }
 
     fn update(&mut self, _window: &Window) {
@@ -70,8 +85,8 @@ impl Game for MyGame {
 		let mut f = Font::from_bytes(frame.gpu(), &PROFONT).unwrap();
 
 		match self.blinker {
-			true => f.add(make_text("hello world!_", Point::new(100.0, 100.0), 20.0)),
-			false => f.add(make_text("hello world!", Point::new(100.0, 100.0), 20.0)),
+			true => f.add(make_text(&format!("{}_", self.text_buffer), Point::new(100.0, 100.0), 60.0)),
+			false => f.add(make_text(&format!("{}", self.text_buffer), Point::new(100.0, 100.0), 60.0)),
 		}
 
         let mut target = frame.as_target();

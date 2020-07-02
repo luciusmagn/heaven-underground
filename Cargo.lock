@@ -168,8 +168,6 @@ dependencies = [
 [[package]]
 name = "coffee"
 version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "623c08ab96becc7f068903d7b18250e61ebfd1cf3a4b04ef8b25446e4c55d464"
 dependencies = [
  "futures",
  "gilrs",
