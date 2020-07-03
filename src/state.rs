@@ -1,7 +1,9 @@
-use coffee::{Timer};
-use coffee::graphics::{Frame, Window};
+use coffee::{Timer, Game, Result as CoffeeResult, load::Task};
+use coffee::graphics::{Frame, Window, Color, Point};
 use coffee::input::KeyboardAndMouse;
 use either::Either;
+
+use crate::text::Label;
 
 use std::sync::Arc;
 use std::boxed::Box;
@@ -16,8 +18,19 @@ pub enum Direction {
 }
 
 pub enum Action {
-	ChangeScreen,
-	MutateState(Box<dyn Fn(&mut Heaven) -> ()>),
+	ChangeScreen(&'static str),
+	MutateState(Box<dyn Fn(&mut Heaven) -> Result<(), Box<dyn std::error::Error + 'static>>>),
+}
+
+impl Action {
+	pub fn execute(&self, heaven: &mut Heaven) -> Result<(), Box<dyn std::error::Error + 'static>> {
+		match self {
+			Action::ChangeScreen(screen) => match screen {
+				_ => Ok(()),
+			},
+			Action::MutateState(fun) => fun(heaven),
+		}
+	}
 }
 
 pub enum Screen {
@@ -33,7 +46,16 @@ pub enum Screen {
 
 impl Screen {
 	fn menu() -> Screen {
-		Screen::Menu { buttons: vec![], selected: 0 }
+		Screen::Menu {
+			buttons: vec![
+				("play game".into(), Action::ChangeScreen("play_game")),
+				("read story".into(), Action::ChangeScreen("read_story")),
+				("options".into(), Action::ChangeScreen("options")),
+				("about".into(), Action::ChangeScreen("about")),
+				("quit".into(), Action::MutateState(Box::new(|game: &mut Heaven| Ok(game.quit_state = true))))
+			],
+			selected: 0
+		}
 	}
 }
 
@@ -80,6 +102,7 @@ pub struct Heaven {
 	pub sprites:    HashMap<&'static str, Vec<u8>>,
 	pub event_tree: Tree,
 	pub minigames:  HashMap<&'static str, Box<dyn Minigame>>,
+	pub quit_state: bool,
 }
 
 impl Heaven {
@@ -98,6 +121,68 @@ impl Heaven {
 			sprites:    HashMap::new(),
 			event_tree: Tree::new(),
 			minigames:  HashMap::new(),
+			quit_state: false,
 		}
+	}
+}
+
+impl Game for Heaven {
+	type Input = KeyboardAndMouse;
+	type LoadingScreen = ();
+
+	fn load(_window: &Window) -> Task<Heaven> {
+		Task::succeed(|| Heaven::new())
+	}
+
+	fn interact(&mut self, _input: &mut Self::Input, _window: &mut Window) {
+		// let kb = input.keyboard();
+
+		// let input_string =
+		// 	kb.released_keys.iter().map(|x| x.to_printable()).collect::<String>();
+
+		// self.text_buffer = format!("{}{}", self.text_buffer, input_string);
+
+		// if kb.released_keys.contains(&KeyCode::Back) {
+		// 	self.text_buffer =
+		// 		self.text_buffer[..cmp::max(self.text_buffer.len() - 1, 0)].to_string();
+		// }
+	}
+
+	fn update(&mut self, _window: &Window) {
+		// if self.tick_count % 60 < 30 {
+		// self.blinker = true;
+		// } else {
+		// self.blinker = false;
+		// }
+		// self.tick();
+	}
+
+	fn draw(&mut self, frame: &mut Frame, _timer: &Timer) {
+		frame.clear(Color::BLACK);
+
+		// let mut f = Font::from_bytes(frame.gpu(), &PROFONT).unwrap();
+
+		// match self.blinker {
+		// 	true => f.add(make_text(
+		// 		&format!("{}_", self.text_buffer),
+		// 		Point::new(100.0, 100.0),
+		// 		60.0,
+		// 	)),
+		// 	false => f.add(make_text(
+		// 		&format!("{}", self.text_buffer),
+		// 		Point::new(100.0, 100.0),
+		// 		60.0,
+		// 	)),
+		// }
+
+		let mut f = Label::new()
+			.content("the heaven underground")
+			.position(Point::new(600.0, 500.0))
+			.bounds((800.0, 500.0))
+			.size(60.0)
+			.make(frame.gpu());
+
+		let mut target = frame.as_target();
+		f.draw(&mut target);
 	}
 }

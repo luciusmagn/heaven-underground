@@ -1,8 +1,9 @@
 [package]
-name = "coffee_test"
+name = "heaven_underground"
 version = "0.1.0"
-authors = ["Lukáš Hozda <luk.hozda@gmail.com>"]
+authors = ["Lukáš Hozda <luk.hozda@gmail.com>", "Alma <alma@gjk.cat>"]
 edition = "2018"
+description = "The Heaven Underground"
 
 [dependencies]
 either = "1.5.3"

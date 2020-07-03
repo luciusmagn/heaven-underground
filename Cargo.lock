@@ -184,14 +184,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "coffee_test"
-version = "0.1.0"
-dependencies = [
- "coffee",
- "either",
-]
-
-[[package]]
 name = "color_quant"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -768,6 +760,14 @@ dependencies = [
  "approx",
  "rusttype 0.8.3",
  "xi-unicode",
+]
+
+[[package]]
+name = "heaven_underground"
+version = "0.1.0"
+dependencies = [
+ "coffee",
+ "either",
 ]
 
 [[package]]
