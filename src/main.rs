@@ -1,7 +1,4 @@
-use coffee::{
-	Game, Result,
-	graphics::WindowSettings,
-};
+use coffee::{Game, Result, graphics::WindowSettings};
 
 mod keys;
 

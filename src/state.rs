@@ -1,10 +1,11 @@
 use coffee::{Timer, Game, load::Task};
 use coffee::graphics::{Frame, Window, Color, Point};
-use coffee::input::KeyboardAndMouse;
+use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
 use either::Either;
 
 use crate::text::Label;
 
+use std::cmp;
 use std::sync::Arc;
 use std::boxed::Box;
 use std::collections::HashMap;
@@ -19,11 +20,16 @@ pub enum Direction {
 
 pub enum Action {
 	ChangeScreen(&'static str),
-	MutateState(Box<dyn Fn(&mut Heaven) -> Result<(), Box<dyn std::error::Error + 'static>>>),
+	MutateState(
+		Box<dyn Fn(&mut Heaven) -> Result<(), Box<dyn std::error::Error + 'static>>>,
+	),
 }
 
 impl Action {
-	pub fn execute(&self, heaven: &mut Heaven) -> Result<(), Box<dyn std::error::Error + 'static>> {
+	pub fn execute(
+		&self,
+		heaven: &mut Heaven,
+	) -> Result<(), Box<dyn std::error::Error + 'static>> {
 		match self {
 			Action::ChangeScreen(screen) => match screen {
 				_ => Ok(()),
@@ -47,14 +53,67 @@ pub enum Screen {
 impl Screen {
 	fn menu() -> Screen {
 		Screen::Menu {
-			buttons: vec![
+			buttons:  vec![
 				("play game".into(), Action::ChangeScreen("play_game")),
 				("read story".into(), Action::ChangeScreen("read_story")),
 				("options".into(), Action::ChangeScreen("options")),
 				("about".into(), Action::ChangeScreen("about")),
-				("quit".into(), Action::MutateState(Box::new(|game: &mut Heaven| Ok(game.quit_state = true))))
+				(
+					"quit".into(),
+					Action::MutateState(Box::new(|game: &mut Heaven| {
+						Ok(game.quit_state = true)
+					})),
+				),
 			],
-			selected: 0
+			selected: 0,
+		}
+	}
+
+	fn render_menu(&self, frame: &mut Frame, _timer: &Timer) {
+		frame.clear(Color::BLACK);
+
+		let mut f = Label::new()
+			.content("the heaven underground")
+			.position(Point::new(600.0, 500.0))
+			.bounds((800.0, 500.0))
+			.size(60.0)
+			.make(frame.gpu());
+
+		let mut target = frame.as_target();
+		f.draw(&mut target);
+
+		if let Screen::Menu { buttons, selected } = self {
+			for (i, (name, _)) in buttons.iter().enumerate() {
+				let content =
+					if i == *selected { format!("> {}", name) } else { name.into() };
+
+				let mut f = Label::new()
+					.content(&content)
+					.position(Point::new(950.0, 600.0 + (i as f32) * 60.0))
+					.size(40.0)
+					.color(if i == *selected { Color::WHITE } else { Color::RED })
+					.make(frame.gpu());
+
+				let mut target = frame.as_target();
+				f.draw(&mut target);
+			}
+		}
+	}
+
+	fn render(&self, frame: &mut Frame, timer: &Timer) {
+		match self {
+			Screen::Menu { .. } => self.render_menu(frame, timer),
+			_ => (),
+		}
+	}
+
+	fn interact_menu(&mut self, input: &mut KeyboardAndMouse, _window: &mut Window) {
+		if let Screen::Menu { buttons, ref mut selected } = self {
+			let kb = input.keyboard();
+
+			if kb.was_key_released(KeyCode::Down) {
+				selected = &mut cmp::max(*selected + 1, buttons.len() - 1)
+			}
 		}
 	}
 }
@@ -157,32 +216,7 @@ impl Game for Heaven {
 		// self.tick();
 	}
 
-	fn draw(&mut self, frame: &mut Frame, _timer: &Timer) {
-		frame.clear(Color::BLACK);
-
-		// let mut f = Font::from_bytes(frame.gpu(), &PROFONT).unwrap();
-
-		// match self.blinker {
-		// 	true => f.add(make_text(
-		// 		&format!("{}_", self.text_buffer),
-		// 		Point::new(100.0, 100.0),
-		// 		60.0,
-		// 	)),
-		// 	false => f.add(make_text(
-		// 		&format!("{}", self.text_buffer),
-		// 		Point::new(100.0, 100.0),
-		// 		60.0,
-		// 	)),
-		// }
-
-		let mut f = Label::new()
-			.content("the heaven underground")
-			.position(Point::new(600.0, 500.0))
-			.bounds((800.0, 500.0))
-			.size(60.0)
-			.make(frame.gpu());
-
-		let mut target = frame.as_target();
-		f.draw(&mut target);
+	fn draw(&mut self, frame: &mut Frame, timer: &Timer) {
+		self.screen.render(frame, timer)
 	}
 }
