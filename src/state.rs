@@ -21,7 +21,7 @@ pub enum Action {
 }
 
 pub enum Screen {
-	Menu { buttons: Vec<(String, Action)> },
+	Menu { buttons: Vec<(String, Action)>, selected: usize },
 	About { scrolling_dir: Direction },
 	ReadStory,
 	Options, //?
@@ -29,6 +29,12 @@ pub enum Screen {
 	Play { buttons: Vec<(String, Action)> },
 	PlayCutscene(String),
 	PlayMinigame(String),
+}
+
+impl Screen {
+	fn menu() -> Screen {
+		Screen::Menu { buttons: vec![], selected: 0 }
+	}
 }
 
 pub type Node = Either<Arc<Event>, Action>;
@@ -41,6 +47,7 @@ pub enum Event {
 	GameOver(String),
 	Cutscene(String, Node),
 	Minigame(String, Box<dyn Fn(String) -> Node>),
+	ChapterDelimiter,
 	End,
 }
 
@@ -48,6 +55,16 @@ pub struct Tree {
 	pub path:             Vec<usize>,
 	pub minigame_results: Vec<String>,
 	pub start:            Event,
+}
+
+impl Tree {
+	pub fn new() -> Self {
+		Self {
+			path:             vec![],
+			minigame_results: vec![],
+			start:            Event::End,
+		}
+	}
 }
 
 pub trait Minigame {
@@ -63,4 +80,24 @@ pub struct Heaven {
 	pub sprites:    HashMap<&'static str, Vec<u8>>,
 	pub event_tree: Tree,
 	pub minigames:  HashMap<&'static str, Box<dyn Minigame>>,
+}
+
+impl Heaven {
+	pub fn new() -> Self {
+		Self {
+			screen:     Screen::menu(),
+			tick_count: 0,
+			fonts:      {
+				let mut h = HashMap::new();
+				h.insert(
+					"ProFont",
+					include_bytes!("./ProFontExtended.ttf").iter().cloned().collect(),
+				);
+				h
+			},
+			sprites:    HashMap::new(),
+			event_tree: Tree::new(),
+			minigames:  HashMap::new(),
+		}
+	}
 }
