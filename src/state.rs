@@ -107,12 +107,29 @@ impl Screen {
 		}
 	}
 
-	fn interact_menu(&mut self, input: &mut KeyboardAndMouse, _window: &mut Window) {
-		if let Screen::Menu { buttons, ref mut selected } = self {
+	fn interact_menu(
+		&mut self,
+		held_keys: &mut Vec<KeyCode>,
+		input: &mut KeyboardAndMouse,
+		_window: &mut Window,
+	) {
+		if let Screen::Menu { buttons, selected } = self {
 			let kb = input.keyboard();
 
+			if kb.is_key_pressed(KeyCode::Down) && !held_keys.contains(&KeyCode::Down) {
+				*selected = cmp::min(*selected + 1, buttons.len() - 1);
+				held_keys.push(KeyCode::Down);
+			}
+			if kb.is_key_pressed(KeyCode::Up) && !held_keys.contains(&KeyCode::Up) {
+				*selected = cmp::max(*selected - 1, 0);
+				held_keys.push(KeyCode::Up);
+			}
+
 			if kb.was_key_released(KeyCode::Down) {
-				selected = &mut cmp::max(*selected + 1, buttons.len() - 1)
+				held_keys.remove_item(&KeyCode::Down);
+			}
+			if kb.was_key_released(KeyCode::Up) {
+				held_keys.remove_item(&KeyCode::Up);
 			}
 		}
 	}
@@ -162,6 +179,7 @@ pub struct Heaven {
 	pub event_tree: Tree,
 	pub minigames:  HashMap<&'static str, Box<dyn Minigame>>,
 	pub quit_state: bool,
+	pub held_keys:  Vec<KeyCode>,
 }
 
 impl Heaven {
@@ -181,6 +199,7 @@ impl Heaven {
 			event_tree: Tree::new(),
 			minigames:  HashMap::new(),
 			quit_state: false,
+			held_keys:  vec![],
 		}
 	}
 }
@@ -193,7 +212,7 @@ impl Game for Heaven {
 		Task::succeed(|| Heaven::new())
 	}
 
-	fn interact(&mut self, _input: &mut Self::Input, _window: &mut Window) {
+	fn interact(&mut self, input: &mut Self::Input, window: &mut Window) {
 		// let kb = input.keyboard();
 
 		// let input_string =
@@ -205,6 +224,7 @@ impl Game for Heaven {
 		// 	self.text_buffer =
 		// 		self.text_buffer[..cmp::max(self.text_buffer.len() - 1, 0)].to_string();
 		// }
+		self.screen.interact_menu(&mut self.held_keys, input, window);
 	}
 
 	fn update(&mut self, _window: &Window) {

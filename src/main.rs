@@ -1,3 +1,5 @@
+#![feature(vec_remove_item)]
+
 use coffee::{Game, Result, graphics::WindowSettings};
 
 mod keys;
