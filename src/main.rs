@@ -1,18 +1,11 @@
-use coffee::graphics::{
-	Color, Frame, Window, WindowSettings, Text, Font, Point, HorizontalAlignment,
-	VerticalAlignment,
+use coffee::{
+	Game, Result, Timer,
+	load::Task,
+	input::KeyboardAndMouse,
+	graphics::{Color, Frame, Window, WindowSettings, Point},
 };
-use coffee::load::Task;
-use coffee::input::KeyboardAndMouse;
-use coffee::input::keyboard::KeyCode;
-use coffee::{Game, Result, Timer};
-
-use std::cmp;
-
-static PROFONT: &[u8] = include_bytes!("./ProFontExtended.ttf");
 
 mod keys;
-use keys::DisplayKey;
 
 pub mod state;
 use state::Heaven;
@@ -30,35 +23,15 @@ fn main() -> Result<()> {
 	})
 }
 
-fn make_text<'a>(src: &'a str, pos: Point, size: f32) -> Text<'a> {
-	Text {
-		content: src,
-		position: pos,
-		size,
-		color: Color::WHITE,
-		bounds: (600.0, 600.0),
-		horizontal_alignment: HorizontalAlignment::Left,
-		vertical_alignment: VerticalAlignment::Top,
-	}
-}
-
 impl Game for Heaven {
 	type Input = KeyboardAndMouse;
-	// No input data
 	type LoadingScreen = ();
 
-	// No loading screen
-
 	fn load(_window: &Window) -> Task<Heaven> {
-		//Task::succeed(|| MyGame {
-		//blinker:     false,
-		//tick_count:  0,
-		//text_buffer: String::new(),
-		//})
 		Task::succeed(|| Heaven::new())
 	}
 
-	fn interact(&mut self, input: &mut Self::Input, _window: &mut Window) {
+	fn interact(&mut self, _input: &mut Self::Input, _window: &mut Window) {
 		// let kb = input.keyboard();
 
 		// let input_string =
