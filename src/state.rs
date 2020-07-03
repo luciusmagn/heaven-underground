@@ -1,4 +1,4 @@
-use coffee::{Timer, Game, Result as CoffeeResult, load::Task};
+use coffee::{Timer, Game, load::Task};
 use coffee::graphics::{Frame, Window, Color, Point};
 use coffee::input::KeyboardAndMouse;
 use either::Either;

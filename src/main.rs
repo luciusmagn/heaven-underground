@@ -1,8 +1,6 @@
 use coffee::{
-	Game, Result, Timer,
-	load::Task,
-	input::KeyboardAndMouse,
-	graphics::{Color, Frame, Window, WindowSettings, Point},
+	Game, Result,
+	graphics::WindowSettings,
 };
 
 mod keys;
@@ -11,7 +9,6 @@ pub mod state;
 use state::Heaven;
 
 pub mod text;
-use text::Label;
 
 fn main() -> Result<()> {
 	Heaven::run(WindowSettings {
