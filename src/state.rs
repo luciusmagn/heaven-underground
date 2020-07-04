@@ -6,10 +6,14 @@ use either::Either;
 use crate::text::Label;
 
 use std::cmp;
+use std::fmt;
 use std::sync::Arc;
 use std::boxed::Box;
 use std::collections::HashMap;
 
+
+
+#[derive(Debug)]
 pub enum Direction {
 	Top,
 	Down,
@@ -23,6 +27,16 @@ pub enum Action {
 	MutateState(
 		Box<dyn Fn(&mut Heaven) -> Result<(), Box<dyn std::error::Error + 'static>>>,
 	),
+}
+
+impl fmt::Debug for Action {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			Action::ChangeScreen(screen) =>
+				f.debug_tuple("Action::ChangeScreen").field(screen).finish(),
+			Action::MutateState(_) => write!(f, "MutateState"),
+		}
+	}
 }
 
 impl Action {
@@ -39,6 +53,7 @@ impl Action {
 	}
 }
 
+#[derive(Debug)]
 pub enum Screen {
 	Menu { buttons: Vec<(String, Action)>, selected: usize },
 	About { scrolling_dir: Direction },
@@ -51,6 +66,9 @@ pub enum Screen {
 }
 
 impl Screen {
+	/*
+	 ** M E N U
+	 */
 	fn menu() -> Screen {
 		Screen::Menu {
 			buttons:  vec![
@@ -61,7 +79,7 @@ impl Screen {
 				(
 					"quit".into(),
 					Action::MutateState(Box::new(|game: &mut Heaven| {
-						Ok(game.quit_state = true)
+						Ok(game.data.quit_state = true)
 					})),
 				),
 			],
@@ -112,7 +130,7 @@ impl Screen {
 		held_keys: &mut Vec<KeyCode>,
 		input: &mut KeyboardAndMouse,
 		_window: &mut Window,
-	) {
+	) -> bool {
 		if let Screen::Menu { buttons, selected } = self {
 			let kb = input.keyboard();
 
@@ -125,22 +143,27 @@ impl Screen {
 				held_keys.push(KeyCode::Down);
 			}
 			if kb.is_key_pressed(KeyCode::Up) && !held_keys.contains(&KeyCode::Up) {
-    			let (num, overflowed) = selected.overflowing_sub(1);
-    			if !overflowed {
+				let (num, overflowed) = selected.overflowing_sub(1);
+				if !overflowed {
 					*selected = cmp::max(num, 0);
-    			} else {
+				} else {
 					*selected = buttons.len() - 1;
-    			}
+				}
 				held_keys.push(KeyCode::Up);
 			}
 
 			if kb.was_key_released(KeyCode::Down) {
-				held_keys.remove_item(&KeyCode::Down);
+				held_keys.retain(|x| x != &KeyCode::Down);
 			}
 			if kb.was_key_released(KeyCode::Up) {
-				held_keys.remove_item(&KeyCode::Up);
+				held_keys.retain(|x| x != &KeyCode::Up);
+			}
+
+			if kb.is_key_pressed(KeyCode::Return) {
+				return true;
 			}
 		}
+		false
 	}
 }
 
@@ -180,35 +203,42 @@ pub trait Minigame {
 	fn interact(&mut self, input: &mut KeyboardAndMouse, window: &mut Window);
 }
 
-pub struct Heaven {
-	pub screen:     Screen,
+#[derive(Debug)]
+pub struct GameInfo {
 	pub tick_count: u64,
-	pub fonts:      HashMap<&'static str, Vec<u8>>,
-	pub sprites:    HashMap<&'static str, Vec<u8>>,
-	pub event_tree: Tree,
-	pub minigames:  HashMap<&'static str, Box<dyn Minigame>>,
 	pub quit_state: bool,
 	pub held_keys:  Vec<KeyCode>,
+	pub fonts:      HashMap<&'static str, Vec<u8>>,
+	pub sprites:    HashMap<&'static str, Vec<u8>>,
+	pub screen:     Screen,
+}
+
+pub struct Heaven {
+	pub event_tree: Tree,
+	pub minigames:  HashMap<&'static str, Box<dyn Minigame>>,
+	pub data:       GameInfo,
 }
 
 impl Heaven {
 	pub fn new() -> Self {
 		Self {
-			screen:     Screen::menu(),
-			tick_count: 0,
-			fonts:      {
-				let mut h = HashMap::new();
-				h.insert(
-					"ProFont",
-					include_bytes!("./ProFontExtended.ttf").iter().cloned().collect(),
-				);
-				h
-			},
-			sprites:    HashMap::new(),
-			event_tree: Tree::new(),
 			minigames:  HashMap::new(),
-			quit_state: false,
-			held_keys:  vec![],
+			event_tree: Tree::new(),
+			data:       GameInfo {
+				screen:     Screen::menu(),
+				sprites:    HashMap::new(),
+				quit_state: false,
+				held_keys:  vec![],
+				tick_count: 0,
+				fonts:      {
+					let mut h = HashMap::new();
+					h.insert(
+						"ProFont",
+						include_bytes!("./ProFontExtended.ttf").iter().cloned().collect(),
+					);
+					h
+				},
+			},
 		}
 	}
 }
@@ -222,30 +252,17 @@ impl Game for Heaven {
 	}
 
 	fn interact(&mut self, input: &mut Self::Input, window: &mut Window) {
-		// let kb = input.keyboard();
-
-		// let input_string =
-		// 	kb.released_keys.iter().map(|x| x.to_printable()).collect::<String>();
-
-		// self.text_buffer = format!("{}{}", self.text_buffer, input_string);
-
-		// if kb.released_keys.contains(&KeyCode::Back) {
-		// 	self.text_buffer =
-		// 		self.text_buffer[..cmp::max(self.text_buffer.len() - 1, 0)].to_string();
-		// }
-		self.screen.interact_menu(&mut self.held_keys, input, window);
+		self.data.quit_state =
+			self.data.screen.interact_menu(&mut self.data.held_keys, input, window);
 	}
 
-	fn update(&mut self, _window: &Window) {
-		// if self.tick_count % 60 < 30 {
-		// self.blinker = true;
-		// } else {
-		// self.blinker = false;
-		// }
-		// self.tick();
-	}
+	fn update(&mut self, _window: &Window) {}
 
 	fn draw(&mut self, frame: &mut Frame, timer: &Timer) {
-		self.screen.render(frame, timer)
+		self.data.screen.render(frame, timer)
+	}
+
+	fn is_finished(&self) -> bool {
+		self.data.quit_state
 	}
 }

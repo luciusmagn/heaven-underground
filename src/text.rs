@@ -2,6 +2,11 @@ use coffee::graphics::{
 	Text, Font, Color, Point, HorizontalAlignment, VerticalAlignment, Gpu,
 };
 
+//static LIGHT_BLUE: Color = Color { r: , g:, b:, a: 1.0 };
+//static DARK_BLUE: Color  = Color { r: , g:, b:, a: 1.0 };
+//static YELLOW: Color     = Color { r: , g:, b:, a: 1.0 };
+static YELLOW: Color = Color::from_rgb(1,2,3);
+
 #[derive(Debug, Clone)]
 pub struct Label<'a> {
 	pub content:              &'a str,
