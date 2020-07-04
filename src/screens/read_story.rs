@@ -1,8 +1,8 @@
 use coffee::Timer;
 use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
-use coffee::graphics::{Frame, Window, Color, Point};
+use coffee::graphics::{Frame, Window, Color, Point, Mesh, Shape, Rectangle};
 
-use crate::text::Label;
+use crate::text::{Label, RED, YELLOW, LIGHT_BLUE, DARK_BLUE};
 use crate::state::{Screen, Heaven};
 
 pub struct ReadStory;
@@ -25,8 +25,35 @@ impl ReadStory {
 			.size(40.0)
 			.make(frame.gpu());
 
+		let mut m = Mesh::new();
+		m.fill(Shape::Rectangle(Rectangle {
+    		x: 200.0,
+    		y: 250.0,
+    		width: 300.0,
+    		height: 300.0,
+		}), RED);
+		m.fill(Shape::Rectangle(Rectangle {
+    		x: 520.0,
+    		y: 250.0,
+    		width: 300.0,
+    		height: 300.0,
+		}), YELLOW);
+		m.fill(Shape::Rectangle(Rectangle {
+    		x: 200.0,
+    		y: 570.0,
+    		width: 300.0,
+    		height: 300.0,
+		}), LIGHT_BLUE);
+		m.fill(Shape::Rectangle(Rectangle {
+    		x: 520.0,
+    		y: 570.0,
+    		width: 300.0,
+    		height: 300.0,
+		}), DARK_BLUE);
+
 		let mut target = frame.as_target();
 		f.draw(&mut target);
+		m.draw(&mut target);
 	}
 
 	pub fn interact(

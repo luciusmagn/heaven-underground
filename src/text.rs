@@ -72,6 +72,12 @@ impl<'a> Label<'a> {
 		let mut f =
 			Font::from_bytes(gpu, unsafe { std::mem::transmute(self.font) }).unwrap();
 
+		f.add(self.as_text());
+
+		f
+	}
+
+	pub fn as_text(&self) -> Text {
 		let Label {
 			content,
 			position,
@@ -82,7 +88,8 @@ impl<'a> Label<'a> {
 			vertical_alignment,
 			..
 		} = self.clone();
-		f.add(Text {
+
+		Text {
 			content,
 			position,
 			size,
@@ -90,8 +97,6 @@ impl<'a> Label<'a> {
 			bounds,
 			horizontal_alignment,
 			vertical_alignment,
-		});
-
-		f
+		}
 	}
 }
