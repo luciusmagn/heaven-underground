@@ -2,10 +2,10 @@ use coffee::graphics::{
 	Text, Font, Color, Point, HorizontalAlignment, VerticalAlignment, Gpu,
 };
 
-//static LIGHT_BLUE: Color = Color { r: , g:, b:, a: 1.0 };
-//static DARK_BLUE: Color  = Color { r: , g:, b:, a: 1.0 };
-//static YELLOW: Color     = Color { r: , g:, b:, a: 1.0 };
-static YELLOW: Color = Color::from_rgb(1,2,3);
+pub static RED: Color = Color::from_rgb(156, 16, 16);
+pub static LIGHT_BLUE: Color = Color::from_rgb(120, 158, 255);
+pub static DARK_BLUE: Color = Color::from_rgb(0, 27, 97);
+pub static YELLOW: Color = Color::from_rgb(251, 255, 135);
 
 #[derive(Debug, Clone)]
 pub struct Label<'a> {
@@ -25,7 +25,7 @@ impl<'a> Label<'a> {
 			content:              "",
 			position:             Point::new(0.0, 0.0),
 			size:                 20.0,
-			color:                Color::RED,
+			color:                RED,
 			bounds:               (400.0, 400.0),
 			horizontal_alignment: HorizontalAlignment::Left,
 			vertical_alignment:   VerticalAlignment::Top,

@@ -6,6 +6,7 @@ pub mod state;
 use state::Heaven;
 
 pub mod text;
+pub mod screens;
 
 fn main() -> Result<()> {
 	Heaven::run(WindowSettings {

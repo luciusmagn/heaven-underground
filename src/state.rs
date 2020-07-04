@@ -1,17 +1,14 @@
 use coffee::{Timer, Game, load::Task};
-use coffee::graphics::{Frame, Window, Color, Point};
+use coffee::graphics::{Frame, Window};
 use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
 use either::Either;
 
-use crate::text::Label;
+use crate::screens::menu::Menu;
 
-use std::cmp;
 use std::fmt;
 use std::sync::Arc;
 use std::boxed::Box;
 use std::collections::HashMap;
-
-
 
 #[derive(Debug)]
 pub enum Direction {
@@ -22,11 +19,10 @@ pub enum Direction {
 	None,
 }
 
+#[derive(Clone)]
 pub enum Action {
 	ChangeScreen(&'static str),
-	MutateState(
-		Box<dyn Fn(&mut Heaven) -> Result<(), Box<dyn std::error::Error + 'static>>>,
-	),
+	MutateState(Box<fn(&mut Heaven) -> Result<(), Box<dyn std::error::Error + 'static>>>),
 }
 
 impl fmt::Debug for Action {
@@ -67,7 +63,7 @@ pub enum Screen {
 
 impl Screen {
 	/*
-	 ** M E N U
+	 ** I N I T I A L I Z E R S
 	 */
 	fn menu() -> Screen {
 		Screen::Menu {
@@ -87,83 +83,33 @@ impl Screen {
 		}
 	}
 
-	fn render_menu(&self, frame: &mut Frame, _timer: &Timer) {
-		frame.clear(Color::BLACK);
-
-		let mut f = Label::new()
-			.content("the heaven underground")
-			.position(Point::new(600.0, 500.0))
-			.bounds((800.0, 500.0))
-			.size(60.0)
-			.make(frame.gpu());
-
-		let mut target = frame.as_target();
-		f.draw(&mut target);
-
-		if let Screen::Menu { buttons, selected } = self {
-			for (i, (name, _)) in buttons.iter().enumerate() {
-				let content =
-					if i == *selected { format!("> {}", name) } else { name.into() };
-
-				let mut f = Label::new()
-					.content(&content)
-					.position(Point::new(950.0, 600.0 + (i as f32) * 60.0))
-					.size(40.0)
-					.color(if i == *selected { Color::WHITE } else { Color::RED })
-					.make(frame.gpu());
-
-				let mut target = frame.as_target();
-				f.draw(&mut target);
-			}
+	fn interact(
+		h: &mut Heaven,
+		input: &mut KeyboardAndMouse,
+		window: &mut Window,
+	) -> bool {
+		match h.data.screen {
+			Screen::Menu { .. } => Menu::from_heaven(h).interact(h, input, window),
+			_ => false,
 		}
 	}
 
-	fn render(&self, frame: &mut Frame, timer: &Timer) {
-		match self {
-			Screen::Menu { .. } => self.render_menu(frame, timer),
+	fn render(h: &mut Heaven, frame: &mut Frame, timer: &Timer) {
+		match h.data.screen {
+			Screen::Menu { .. } => Menu::from_heaven(h).render(h, frame, timer),
 			_ => (),
 		}
 	}
 
-	fn interact_menu(
-		&mut self,
-		held_keys: &mut Vec<KeyCode>,
-		input: &mut KeyboardAndMouse,
-		_window: &mut Window,
-	) -> bool {
-		if let Screen::Menu { buttons, selected } = self {
-			let kb = input.keyboard();
-
-			if kb.is_key_pressed(KeyCode::Down) && !held_keys.contains(&KeyCode::Down) {
-				if *selected + 1 == buttons.len() {
-					*selected = 0;
-				} else {
-					*selected = cmp::min(*selected + 1, buttons.len() - 1);
-				}
-				held_keys.push(KeyCode::Down);
-			}
-			if kb.is_key_pressed(KeyCode::Up) && !held_keys.contains(&KeyCode::Up) {
-				let (num, overflowed) = selected.overflowing_sub(1);
-				if !overflowed {
-					*selected = cmp::max(num, 0);
-				} else {
-					*selected = buttons.len() - 1;
-				}
-				held_keys.push(KeyCode::Up);
-			}
-
-			if kb.was_key_released(KeyCode::Down) {
-				held_keys.retain(|x| x != &KeyCode::Down);
-			}
-			if kb.was_key_released(KeyCode::Up) {
-				held_keys.retain(|x| x != &KeyCode::Up);
-			}
-
-			if kb.is_key_pressed(KeyCode::Return) {
-				return true;
-			}
+	/*
+		** U T I L S
+		*/
+	pub fn selected(&mut self) -> Option<&mut usize> {
+		if let Screen::Menu { buttons: _, selected } = self {
+			Some(selected)
+		} else {
+			None
 		}
-		false
 	}
 }
 
@@ -252,14 +198,13 @@ impl Game for Heaven {
 	}
 
 	fn interact(&mut self, input: &mut Self::Input, window: &mut Window) {
-		self.data.quit_state =
-			self.data.screen.interact_menu(&mut self.data.held_keys, input, window);
+		self.data.quit_state = Screen::interact(self, input, window);
 	}
 
 	fn update(&mut self, _window: &Window) {}
 
 	fn draw(&mut self, frame: &mut Frame, timer: &Timer) {
-		self.data.screen.render(frame, timer)
+		Screen::render(self, frame, timer)
 	}
 
 	fn is_finished(&self) -> bool {
