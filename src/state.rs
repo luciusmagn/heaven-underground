@@ -3,7 +3,7 @@ use coffee::graphics::{Frame, Window};
 use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
 use either::Either;
 
-use crate::screens::menu::Menu;
+use crate::screens::{Menu, Play, About, Options, ReadStory};
 
 use std::fmt;
 use std::sync::Arc;
@@ -21,7 +21,7 @@ pub enum Direction {
 
 #[derive(Clone)]
 pub enum Action {
-	ChangeScreen(&'static str),
+	ChangeScreen(ScreenName),
 	MutateState(Box<fn(&mut Heaven) -> Result<(), Box<dyn std::error::Error + 'static>>>),
 }
 
@@ -40,13 +40,36 @@ impl Action {
 		&self,
 		heaven: &mut Heaven,
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
+		use ScreenName::*;
+
 		match self {
-			Action::ChangeScreen(screen) => match screen {
-				_ => Ok(()),
-			},
+			Action::ChangeScreen(screen) => {
+				match screen {
+					Play => heaven.data.screen = Screen::play(),
+					Menu => heaven.data.screen = Screen::menu(),
+					About => heaven.data.screen = Screen::about(),
+					Options => heaven.data.screen = Screen::options(),
+					ReadStory => heaven.data.screen = Screen::read_story(),
+					_ => (),
+				}
+
+				Ok(())
+			}
 			Action::MutateState(fun) => fun(heaven),
 		}
 	}
+}
+
+#[derive(Clone, Debug)]
+pub enum ScreenName {
+	Menu,
+	About,
+	ReadStory,
+	Options,
+	Quit,
+	Play,
+	PlayCutscene,
+	PlayMinigame,
 }
 
 #[derive(Debug)]
@@ -56,7 +79,7 @@ pub enum Screen {
 	ReadStory,
 	Options, //?
 	Quit,
-	Play { buttons: Vec<(String, Action)> },
+	Play,
 	PlayCutscene(String),
 	PlayMinigame(String),
 }
@@ -65,13 +88,13 @@ impl Screen {
 	/*
 	 ** I N I T I A L I Z E R S
 	 */
-	fn menu() -> Screen {
+	pub fn menu() -> Screen {
 		Screen::Menu {
 			buttons:  vec![
-				("play game".into(), Action::ChangeScreen("play_game")),
-				("read story".into(), Action::ChangeScreen("read_story")),
-				("options".into(), Action::ChangeScreen("options")),
-				("about".into(), Action::ChangeScreen("about")),
+				("play game".into(), Action::ChangeScreen(ScreenName::Play)),
+				("read story".into(), Action::ChangeScreen(ScreenName::ReadStory)),
+				("options".into(), Action::ChangeScreen(ScreenName::Options)),
+				("about".into(), Action::ChangeScreen(ScreenName::About)),
 				(
 					"quit".into(),
 					Action::MutateState(Box::new(|game: &mut Heaven| {
@@ -83,6 +106,26 @@ impl Screen {
 		}
 	}
 
+	pub fn play() -> Screen {
+		Screen::Play
+	}
+
+	pub fn about() -> Screen {
+		Screen::About { scrolling_dir: Direction::Down }
+	}
+
+	pub fn options() -> Screen {
+		Screen::Options
+	}
+
+	pub fn read_story() -> Screen {
+		Screen::ReadStory
+	}
+
+	/*
+		** M A I N
+		*/
+
 	fn interact(
 		h: &mut Heaven,
 		input: &mut KeyboardAndMouse,
@@ -90,6 +133,10 @@ impl Screen {
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
 		match h.data.screen {
 			Screen::Menu { .. } => Menu::from_heaven(h).interact(h, input, window),
+			Screen::Play { .. } => Play::from_heaven(h).interact(h, input, window),
+			Screen::About { .. } => About::from_heaven(h).interact(h, input, window),
+			Screen::Options => Options::from_heaven(h).interact(h, input, window),
+			Screen::ReadStory => ReadStory::from_heaven(h).interact(h, input, window),
 			_ => Ok(()),
 		}
 	}
@@ -97,6 +144,10 @@ impl Screen {
 	fn render(h: &mut Heaven, frame: &mut Frame, timer: &Timer) {
 		match h.data.screen {
 			Screen::Menu { .. } => Menu::from_heaven(h).render(h, frame, timer),
+			Screen::Play { .. } => Play::from_heaven(h).render(h, frame, timer),
+			Screen::About { .. } => About::from_heaven(h).render(h, frame, timer),
+			Screen::Options => Options::from_heaven(h).render(h, frame, timer),
+			Screen::ReadStory => ReadStory::from_heaven(h).render(h, frame, timer),
 			_ => (),
 		}
 	}
@@ -199,7 +250,7 @@ impl Game for Heaven {
 
 	fn interact(&mut self, input: &mut Self::Input, window: &mut Window) {
 		if let Err(e) = Screen::interact(self, input, window) {
-    		eprintln!("{}", e)
+			eprintln!("{}", e)
 		}
 	}
 

@@ -88,7 +88,7 @@ impl Menu {
 		}
 
 		if kb.is_key_pressed(KeyCode::Return) {
-			return self.buttons[self.selected].1.execute(heaven)
+			return self.buttons[self.selected].1.execute(heaven);
 		}
 		Ok(())
 	}
