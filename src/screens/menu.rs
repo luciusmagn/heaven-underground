@@ -55,7 +55,7 @@ impl Menu {
 		heaven: &mut Heaven,
 		input: &mut KeyboardAndMouse,
 		_window: &mut Window,
-	) -> bool {
+	) -> Result<(), Box<dyn std::error::Error + 'static>> {
 		let selected = heaven.data.screen.selected().unwrap();
 		let kb = input.keyboard();
 
@@ -88,8 +88,8 @@ impl Menu {
 		}
 
 		if kb.is_key_pressed(KeyCode::Return) {
-			return true;
+			return self.buttons[self.selected].1.execute(heaven)
 		}
-		false
+		Ok(())
 	}
 }

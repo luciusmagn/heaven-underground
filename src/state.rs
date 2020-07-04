@@ -87,10 +87,10 @@ impl Screen {
 		h: &mut Heaven,
 		input: &mut KeyboardAndMouse,
 		window: &mut Window,
-	) -> bool {
+	) -> Result<(), Box<dyn std::error::Error + 'static>> {
 		match h.data.screen {
 			Screen::Menu { .. } => Menu::from_heaven(h).interact(h, input, window),
-			_ => false,
+			_ => Ok(()),
 		}
 	}
 
@@ -198,7 +198,9 @@ impl Game for Heaven {
 	}
 
 	fn interact(&mut self, input: &mut Self::Input, window: &mut Window) {
-		self.data.quit_state = Screen::interact(self, input, window);
+		if let Err(e) = Screen::interact(self, input, window) {
+    		eprintln!("{}", e)
+		}
 	}
 
 	fn update(&mut self, _window: &Window) {}
