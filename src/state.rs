@@ -117,11 +117,20 @@ impl Screen {
 			let kb = input.keyboard();
 
 			if kb.is_key_pressed(KeyCode::Down) && !held_keys.contains(&KeyCode::Down) {
-				*selected = cmp::min(*selected + 1, buttons.len() - 1);
+				if *selected + 1 == buttons.len() {
+					*selected = 0;
+				} else {
+					*selected = cmp::min(*selected + 1, buttons.len() - 1);
+				}
 				held_keys.push(KeyCode::Down);
 			}
 			if kb.is_key_pressed(KeyCode::Up) && !held_keys.contains(&KeyCode::Up) {
-				*selected = cmp::max(*selected - 1, 0);
+    			let (num, overflowed) = selected.overflowing_sub(1);
+    			if !overflowed {
+					*selected = cmp::max(num, 0);
+    			} else {
+					*selected = buttons.len() - 1;
+    			}
 				held_keys.push(KeyCode::Up);
 			}
 
