@@ -10,7 +10,7 @@ use std::sync::Arc;
 use std::boxed::Box;
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Direction {
 	Top,
 	Down,
@@ -21,7 +21,7 @@ pub enum Direction {
 
 #[derive(Clone)]
 pub enum Action {
-	ChangeScreen(ScreenName),
+	ChangeScreen(Screen),
 	MutateState(Box<fn(&mut Heaven) -> Result<(), Box<dyn std::error::Error + 'static>>>),
 }
 
@@ -40,19 +40,9 @@ impl Action {
 		&self,
 		heaven: &mut Heaven,
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
-		use ScreenName::*;
-
 		match self {
 			Action::ChangeScreen(screen) => {
-				match screen {
-					Play => heaven.data.screen = Screen::play(),
-					Menu => heaven.data.screen = Screen::menu(),
-					About => heaven.data.screen = Screen::about(),
-					Options => heaven.data.screen = Screen::options(),
-					ReadStory => heaven.data.screen = Screen::read_story(),
-					_ => (),
-				}
-
+    			heaven.screen = screen.clone();
 				Ok(())
 			}
 			Action::MutateState(fun) => fun(heaven),
@@ -60,19 +50,8 @@ impl Action {
 	}
 }
 
-#[derive(Clone, Debug)]
-pub enum ScreenName {
-	Menu,
-	About,
-	ReadStory,
-	Options,
-	Quit,
-	Play,
-	PlayCutscene,
-	PlayMinigame,
-}
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Screen {
 	Menu { buttons: Vec<(String, Action)>, selected: usize },
 	About { scrolling_dir: Direction },
@@ -91,14 +70,14 @@ impl Screen {
 	pub fn menu() -> Screen {
 		Screen::Menu {
 			buttons:  vec![
-				("play game".into(), Action::ChangeScreen(ScreenName::Play)),
-				("read story".into(), Action::ChangeScreen(ScreenName::ReadStory)),
-				("options".into(), Action::ChangeScreen(ScreenName::Options)),
-				("about".into(), Action::ChangeScreen(ScreenName::About)),
+				("play game".into(), Action::ChangeScreen(Screen::play())),
+				("read story".into(), Action::ChangeScreen(Screen::read_story())),
+				("options".into(), Action::ChangeScreen(Screen::options())),
+				("about".into(), Action::ChangeScreen(Screen::about())),
 				(
 					"quit".into(),
 					Action::MutateState(Box::new(|game: &mut Heaven| {
-						Ok(game.data.quit_state = true)
+						Ok(game.quit_state = true)
 					})),
 				),
 			],
@@ -131,7 +110,7 @@ impl Screen {
 		input: &mut KeyboardAndMouse,
 		window: &mut Window,
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
-		match h.data.screen {
+		match h.screen {
 			Screen::Menu { .. } => Menu::from_heaven(h).interact(h, input, window),
 			Screen::Play { .. } => Play::from_heaven(h).interact(h, input, window),
 			Screen::About { .. } => About::from_heaven(h).interact(h, input, window),
@@ -142,7 +121,7 @@ impl Screen {
 	}
 
 	fn render(h: &mut Heaven, frame: &mut Frame, timer: &Timer) {
-		match h.data.screen {
+		match h.screen {
 			Screen::Menu { .. } => Menu::from_heaven(h).render(h, frame, timer),
 			Screen::Play { .. } => Play::from_heaven(h).render(h, frame, timer),
 			Screen::About { .. } => About::from_heaven(h).render(h, frame, timer),
@@ -200,8 +179,10 @@ pub trait Minigame {
 	fn interact(&mut self, input: &mut KeyboardAndMouse, window: &mut Window);
 }
 
-#[derive(Debug)]
-pub struct GameInfo {
+
+pub struct Heaven {
+	pub event_tree: Tree,
+	pub minigames:  HashMap<&'static str, Box<dyn Minigame>>,
 	pub tick_count: u64,
 	pub quit_state: bool,
 	pub held_keys:  Vec<KeyCode>,
@@ -210,31 +191,23 @@ pub struct GameInfo {
 	pub screen:     Screen,
 }
 
-pub struct Heaven {
-	pub event_tree: Tree,
-	pub minigames:  HashMap<&'static str, Box<dyn Minigame>>,
-	pub data:       GameInfo,
-}
-
 impl Heaven {
 	pub fn new() -> Self {
 		Self {
 			minigames:  HashMap::new(),
 			event_tree: Tree::new(),
-			data:       GameInfo {
-				screen:     Screen::menu(),
-				sprites:    HashMap::new(),
-				quit_state: false,
-				held_keys:  vec![],
-				tick_count: 0,
-				fonts:      {
-					let mut h = HashMap::new();
-					h.insert(
-						"ProFont",
-						include_bytes!("./ProFontExtended.ttf").iter().cloned().collect(),
-					);
-					h
-				},
+			screen:     Screen::menu(),
+			sprites:    HashMap::new(),
+			quit_state: false,
+			held_keys:  vec![],
+			tick_count: 0,
+			fonts:      {
+				let mut h = HashMap::new();
+				h.insert(
+					"ProFont",
+					include_bytes!("./ProFontExtended.ttf").iter().cloned().collect(),
+				);
+				h
 			},
 		}
 	}
@@ -261,6 +234,6 @@ impl Game for Heaven {
 	}
 
 	fn is_finished(&self) -> bool {
-		self.data.quit_state
+		self.quit_state
 	}
 }

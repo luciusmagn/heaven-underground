@@ -8,7 +8,7 @@ use crate::state::{Screen, Heaven};
 pub struct About;
 impl About {
 	pub fn from_heaven(heaven: &Heaven) -> About {
-		if let Screen::About { .. } = heaven.data.screen {
+		if let Screen::About { .. } = heaven.screen {
 			About
 		} else {
 			unreachable!("you are retarded")
@@ -38,7 +38,7 @@ impl About {
 		let kb = input.keyboard();
 
 		if kb.is_key_pressed(KeyCode::Back) {
-			heaven.data.screen = Screen::menu();
+			heaven.screen = Screen::menu();
 		}
 
 		Ok(())

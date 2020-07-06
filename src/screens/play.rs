@@ -8,7 +8,7 @@ use crate::text::{Label, RED, LIGHT_BLUE, DARK_BLUE, YELLOW};
 pub struct Play;
 impl Play {
 	pub fn from_heaven(heaven: &Heaven) -> Play {
-		if let Screen::Play { .. } = heaven.data.screen {
+		if let Screen::Play { .. } = heaven.screen {
 			Play
 		} else {
 			unreachable!("you are retarded")
@@ -84,7 +84,7 @@ impl Play {
 		let kb = input.keyboard();
 
 		if kb.is_key_pressed(KeyCode::Back) {
-			heaven.data.screen = Screen::menu();
+			heaven.screen = Screen::menu();
 		}
 
 		Ok(())

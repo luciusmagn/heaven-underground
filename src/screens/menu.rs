@@ -14,7 +14,7 @@ pub struct Menu {
 
 impl Menu {
 	pub fn from_heaven(heaven: &Heaven) -> Menu {
-		if let Screen::Menu { buttons, selected } = &heaven.data.screen {
+		if let Screen::Menu { buttons, selected } = &heaven.screen {
 			Menu { buttons: buttons.clone(), selected: *selected }
 		} else {
 			unreachable!("you are retarded")
@@ -56,20 +56,20 @@ impl Menu {
 		input: &mut KeyboardAndMouse,
 		_window: &mut Window,
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
-		let selected = heaven.data.screen.selected().unwrap();
+		let selected = heaven.screen.selected().unwrap();
 		let kb = input.keyboard();
 
 		if kb.is_key_pressed(KeyCode::Down)
-			&& !heaven.data.held_keys.contains(&KeyCode::Down)
+			&& !heaven.held_keys.contains(&KeyCode::Down)
 		{
 			if self.selected + 1 == self.buttons.len() {
 				*selected = 0;
 			} else {
 				*selected = cmp::min(self.selected + 1, self.buttons.len() - 1);
 			}
-			heaven.data.held_keys.push(KeyCode::Down);
+			heaven.held_keys.push(KeyCode::Down);
 		}
-		if kb.is_key_pressed(KeyCode::Up) && !heaven.data.held_keys.contains(&KeyCode::Up)
+		if kb.is_key_pressed(KeyCode::Up) && !heaven.held_keys.contains(&KeyCode::Up)
 		{
 			let (num, overflowed) = self.selected.overflowing_sub(1);
 			if !overflowed {
@@ -77,14 +77,14 @@ impl Menu {
 			} else {
 				*selected = self.buttons.len() - 1;
 			}
-			heaven.data.held_keys.push(KeyCode::Up);
+			heaven.held_keys.push(KeyCode::Up);
 		}
 
 		if kb.was_key_released(KeyCode::Down) {
-			heaven.data.held_keys.retain(|x| x != &KeyCode::Down);
+			heaven.held_keys.retain(|x| x != &KeyCode::Down);
 		}
 		if kb.was_key_released(KeyCode::Up) {
-			heaven.data.held_keys.retain(|x| x != &KeyCode::Up);
+			heaven.held_keys.retain(|x| x != &KeyCode::Up);
 		}
 
 		if kb.is_key_pressed(KeyCode::Return) {
