@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity, clippy::new_without_default, clippy::unit_arg)]
 use coffee::{Game, Result, graphics::WindowSettings};
 
 mod keys;
@@ -10,7 +11,7 @@ pub mod screens;
 
 fn main() -> Result<()> {
 	Heaven::run(WindowSettings {
-		title:      String::from("A caffeinated game"),
+		title:      String::from("The Heaven Underground"),
 		size:       (1280, 1024),
 		resizable:  false,
 		fullscreen: false,
