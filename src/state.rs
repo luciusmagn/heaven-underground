@@ -53,7 +53,8 @@ impl Action {
 
 #[derive(Debug, Clone)]
 pub enum Screen {
-	Menu { buttons: Vec<(String, Action)>, selected: usize },
+	//Menu(Menu),
+	Menu { buttons: Arc<Vec<(String, Action)>>, selected: usize },
 	About { scrolling_dir: Direction },
 	ReadStory,
 	Options, //?
@@ -69,7 +70,7 @@ impl Screen {
 	 */
 	pub fn menu() -> Screen {
 		Screen::Menu {
-			buttons:  vec![
+			buttons: Arc::new(vec![
 				("play game".into(), Action::ChangeScreen(Screen::play())),
 				("read story".into(), Action::ChangeScreen(Screen::read_story())),
 				("options".into(), Action::ChangeScreen(Screen::options())),
@@ -80,7 +81,7 @@ impl Screen {
 						Ok(game.quit_state = true)
 					})),
 				),
-			],
+			]),
 			selected: 0,
 		}
 	}

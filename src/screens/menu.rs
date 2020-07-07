@@ -6,9 +6,11 @@ use crate::text::Label;
 use crate::state::{Screen, Action, Heaven};
 
 use std::cmp;
+use std::sync::Arc;
 
+#[derive(Clone, Debug)]
 pub struct Menu {
-	buttons:  Vec<(String, Action)>,
+	buttons:  Arc<Vec<(String, Action)>>,
 	selected: usize,
 }
 
@@ -31,23 +33,20 @@ impl Menu {
 			.size(60.0)
 			.make(frame.gpu());
 
-		let mut target = frame.as_target();
-		f.draw(&mut target);
 
 		for (i, (name, _)) in self.buttons.iter().enumerate() {
 			let content =
 				if i == self.selected { format!("> {}", name) } else { name.into() };
 
-			let mut f = Label::new()
+			f.add(Label::new()
 				.content(&content)
 				.position(Point::new(950.0, 600.0 + (i as f32) * 60.0))
 				.size(40.0)
 				.color(if i == self.selected { Color::WHITE } else { crate::text::RED })
-				.make(frame.gpu());
-
-			let mut target = frame.as_target();
-			f.draw(&mut target);
+				.as_text());
 		}
+		let mut target = frame.as_target();
+		f.draw(&mut target);
 	}
 
 	pub fn interact(
