@@ -12,4 +12,4 @@ either = "1.5.3"
 
 [dependencies.coffee]
 path = "./coffee"
-features = ["vulkan"]
+features = ["opengl", "debug"]
