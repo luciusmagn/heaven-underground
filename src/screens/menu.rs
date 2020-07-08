@@ -23,15 +23,17 @@ impl Menu {
 		}
 	}
 
-	pub fn render(&self, _heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
+	pub fn render(&self, heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
 		frame.clear(Color::BLACK);
 
-		let mut f = Label::new()
+		let f = &mut heaven.fonts.get_mut("ProFontExtended").unwrap();
+
+		f.add(Label::new()
 			.content("the heaven underground")
 			.position(Point::new(600.0, 500.0))
 			.bounds((800.0, 500.0))
 			.size(60.0)
-			.make(frame.gpu());
+			.as_text());
 
 
 		for (i, (name, _)) in self.buttons.iter().enumerate() {

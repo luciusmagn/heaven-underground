@@ -1,6 +1,7 @@
-use coffee::{Timer, Game, load::Task};
+use coffee::{Timer, Game, load::{Task, Join}};
 use coffee::graphics::{Frame, Window};
 use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
+use coffee::graphics::Font;
 use either::Either;
 
 use crate::screens::{Menu, Play, About, Options, ReadStory};
@@ -42,7 +43,7 @@ impl Action {
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
 		match self {
 			Action::ChangeScreen(screen) => {
-    			heaven.screen = screen.clone();
+				heaven.screen = screen.clone();
 				Ok(())
 			}
 			Action::MutateState(fun) => fun(heaven),
@@ -147,7 +148,7 @@ impl Screen {
 pub type Node = Either<Arc<Event>, Action>;
 
 pub enum Event {
-	TimeScreen(Node),
+	TimeScreen((String, String, String), Node),
 	Text(Node),
 	MultipleChoice(Vec<Node>),
 	Choice(Node, Node),
@@ -187,7 +188,7 @@ pub struct Heaven {
 	pub tick_count: u64,
 	pub quit_state: bool,
 	pub held_keys:  Vec<KeyCode>,
-	pub fonts:      HashMap<&'static str, Vec<u8>>,
+	pub fonts:      HashMap<&'static str, Font>,
 	pub sprites:    HashMap<&'static str, Vec<u8>>,
 	pub screen:     Screen,
 }
@@ -202,14 +203,7 @@ impl Heaven {
 			quit_state: false,
 			held_keys:  vec![],
 			tick_count: 0,
-			fonts:      {
-				let mut h = HashMap::new();
-				h.insert(
-					"ProFont",
-					include_bytes!("./ProFontExtended.ttf").iter().cloned().collect(),
-				);
-				h
-			},
+			fonts:      HashMap::new(),
 		}
 	}
 }
@@ -219,7 +213,9 @@ impl Game for Heaven {
 	type LoadingScreen = ();
 
 	fn load(_window: &Window) -> Task<Heaven> {
-		Task::succeed(|| Heaven::new())
+		(Font::load_from_bytes(include_bytes!("./ProFontExtended.ttf")), Task::succeed(|| Heaven::new()))
+			.join()
+			.map(|(font, mut heaven)| { heaven.fonts.insert("ProFontExtended", font); heaven })
 	}
 
 	fn interact(&mut self, input: &mut Self::Input, window: &mut Window) {

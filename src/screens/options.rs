@@ -15,15 +15,16 @@ impl Options {
 		}
 	}
 
-	pub fn render(&self, _heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
+	pub fn render(&self, heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
 		frame.clear(Color::BLACK);
+		let f = &mut heaven.fonts.get_mut("ProFontExtended").unwrap();
 
-		let mut f = Label::new()
+		f.add(Label::new()
 			.content("options")
 			.position(Point::new(40.0, 30.0))
 			.bounds((800.0, 500.0))
 			.size(40.0)
-			.make(frame.gpu());
+			.as_text());
 
 		let mut target = frame.as_target();
 		f.draw(&mut target);
