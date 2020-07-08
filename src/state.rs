@@ -14,15 +14,6 @@ use std::sync::Arc;
 use std::boxed::Box;
 use std::collections::HashMap;
 
-#[derive(Debug, Clone)]
-pub enum Direction {
-	Top,
-	Down,
-	Left,
-	Right,
-	None,
-}
-
 #[derive(Clone)]
 pub enum Action {
 	ChangeScreen(Screen),
@@ -58,7 +49,7 @@ impl Action {
 pub enum Screen {
 	//Menu(Menu),
 	Menu { buttons: Arc<Vec<(String, Action)>>, selected: usize },
-	About { scrolling_dir: Direction },
+	About,
 	ReadStory,
 	Options, //?
 	Quit,
@@ -94,7 +85,7 @@ impl Screen {
 	}
 
 	pub fn about() -> Screen {
-		Screen::About { scrolling_dir: Direction::Down }
+		Screen::About
 	}
 
 	pub fn options() -> Screen {
@@ -117,7 +108,7 @@ impl Screen {
 		match h.screen {
 			Screen::Menu { .. } => Menu::from_heaven(h).interact(h, input, window),
 			Screen::Play { .. } => Play::from_heaven(h).interact(h, input, window),
-			Screen::About { .. } => About::from_heaven(h).interact(h, input, window),
+			Screen::About  => About::from_heaven(h).interact(h, input, window),
 			Screen::Options => Options::from_heaven(h).interact(h, input, window),
 			Screen::ReadStory => ReadStory::from_heaven(h).interact(h, input, window),
 			_ => Ok(()),
@@ -128,7 +119,7 @@ impl Screen {
 		match h.screen {
 			Screen::Menu { .. } => Menu::from_heaven(h).render(h, frame, timer),
 			Screen::Play { .. } => Play::from_heaven(h).render(h, frame, timer),
-			Screen::About { .. } => About::from_heaven(h).render(h, frame, timer),
+			Screen::About => About::from_heaven(h).render(h, frame, timer),
 			Screen::Options => Options::from_heaven(h).render(h, frame, timer),
 			Screen::ReadStory => ReadStory::from_heaven(h).render(h, frame, timer),
 			_ => (),
