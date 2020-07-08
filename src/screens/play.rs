@@ -19,12 +19,14 @@ impl Play {
 		frame.clear(Color::BLACK);
 		let f = &mut heaven.fonts.get_mut("ProFontExtended").unwrap();
 
-		f.add(Label::new()
-			.content("play game")
-			.position(Point::new(40.0, 30.0))
-			.bounds((800.0, 500.0))
-			.size(40.0)
-			.as_text());
+		f.add(
+			Label::new()
+				.content("play game")
+				.position(Point::new(40.0, 30.0))
+				.bounds((800.0, 500.0))
+				.size(40.0)
+				.as_text(),
+		);
 
 		f.add(
 			Label::new()
@@ -33,7 +35,7 @@ impl Play {
 				.position(Point::new(300.0, 200.0))
 				.bounds((800.0, 500.0))
 				.size(60.0)
-				.as_text()
+				.as_text(),
 		);
 		f.add(
 			Label::new()
@@ -42,7 +44,7 @@ impl Play {
 				.position(Point::new(300.0, 300.0))
 				.bounds((800.0, 500.0))
 				.size(60.0)
-				.as_text()
+				.as_text(),
 		);
 		f.add(
 			Label::new()
@@ -51,7 +53,7 @@ impl Play {
 				.position(Point::new(300.0, 400.0))
 				.bounds((800.0, 500.0))
 				.size(60.0)
-				.as_text()
+				.as_text(),
 		);
 		f.add(
 			Label::new()
@@ -60,7 +62,7 @@ impl Play {
 				.position(Point::new(300.0, 500.0))
 				.bounds((800.0, 500.0))
 				.size(60.0)
-				.as_text()
+				.as_text(),
 		);
 		f.add(
 			Label::new()
@@ -69,7 +71,7 @@ impl Play {
 				.position(Point::new(300.0, 600.0))
 				.bounds((800.0, 500.0))
 				.size(60.0)
-				.as_text()
+				.as_text(),
 		);
 
 		let mut target = frame.as_target();

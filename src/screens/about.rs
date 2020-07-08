@@ -19,12 +19,14 @@ impl About {
 		frame.clear(Color::BLACK);
 		let f = &mut heaven.fonts.get_mut("ProFontExtended").unwrap();
 
-		f.add(Label::new()
-			.content("about game")
-			.position(Point::new(40.0, 30.0))
-			.bounds((800.0, 500.0))
-			.size(40.0)
-			.as_text());
+		f.add(
+			Label::new()
+				.content("about game")
+				.position(Point::new(40.0, 30.0))
+				.bounds((800.0, 500.0))
+				.size(40.0)
+				.as_text(),
+		);
 
 		let mut target = frame.as_target();
 		f.draw(&mut target);

@@ -25,27 +25,33 @@ impl Menu {
 
 	pub fn render(&self, heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
 		frame.clear(Color::BLACK);
-
 		let f = &mut heaven.fonts.get_mut("ProFontExtended").unwrap();
 
-		f.add(Label::new()
-			.content("the heaven underground")
-			.position(Point::new(600.0, 500.0))
-			.bounds((800.0, 500.0))
-			.size(60.0)
-			.as_text());
-
+		f.add(
+			Label::new()
+				.content("the heaven underground")
+				.position(Point::new(600.0, 500.0))
+				.bounds((800.0, 500.0))
+				.size(60.0)
+				.as_text(),
+		);
 
 		for (i, (name, _)) in self.buttons.iter().enumerate() {
 			let content =
 				if i == self.selected { format!("> {}", name) } else { name.into() };
 
-			f.add(Label::new()
-				.content(&content)
-				.position(Point::new(950.0, 600.0 + (i as f32) * 60.0))
-				.size(40.0)
-				.color(if i == self.selected { Color::WHITE } else { crate::text::RED })
-				.as_text());
+			f.add(
+				Label::new()
+					.content(&content)
+					.position(Point::new(950.0, 600.0 + (i as f32) * 60.0))
+					.size(40.0)
+					.color(if i == self.selected {
+						Color::WHITE
+					} else {
+						crate::text::RED
+					})
+					.as_text(),
+			);
 		}
 		let mut target = frame.as_target();
 		f.draw(&mut target);
@@ -60,8 +66,7 @@ impl Menu {
 		let selected = heaven.screen.selected().unwrap();
 		let kb = input.keyboard();
 
-		if kb.is_key_pressed(KeyCode::Down)
-			&& !heaven.held_keys.contains(&KeyCode::Down)
+		if kb.is_key_pressed(KeyCode::Down) && !heaven.held_keys.contains(&KeyCode::Down)
 		{
 			if self.selected + 1 == self.buttons.len() {
 				*selected = 0;
@@ -70,8 +75,7 @@ impl Menu {
 			}
 			heaven.held_keys.push(KeyCode::Down);
 		}
-		if kb.is_key_pressed(KeyCode::Up) && !heaven.held_keys.contains(&KeyCode::Up)
-		{
+		if kb.is_key_pressed(KeyCode::Up) && !heaven.held_keys.contains(&KeyCode::Up) {
 			let (num, overflowed) = self.selected.overflowing_sub(1);
 			if !overflowed {
 				*selected = cmp::max(num, 0);

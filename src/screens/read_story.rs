@@ -19,38 +19,52 @@ impl ReadStory {
 		frame.clear(Color::BLACK);
 		let f = &mut heaven.fonts.get_mut("ProFontExtended").unwrap();
 
-		f.add(Label::new()
-			.content("read story")
-			.position(Point::new(40.0, 30.0))
-			.bounds((800.0, 500.0))
-			.size(40.0)
-			.as_text());
+		f.add(
+			Label::new()
+				.content("read story")
+				.position(Point::new(40.0, 30.0))
+				.bounds((800.0, 500.0))
+				.size(40.0)
+				.as_text(),
+		);
 
 		let mut m = Mesh::new();
-		m.fill(Shape::Rectangle(Rectangle {
-    		x: 200.0,
-    		y: 250.0,
-    		width: 300.0,
-    		height: 300.0,
-		}), RED);
-		m.fill(Shape::Rectangle(Rectangle {
-    		x: 520.0,
-    		y: 250.0,
-    		width: 300.0,
-    		height: 300.0,
-		}), YELLOW);
-		m.fill(Shape::Rectangle(Rectangle {
-    		x: 200.0,
-    		y: 570.0,
-    		width: 300.0,
-    		height: 300.0,
-		}), LIGHT_BLUE);
-		m.fill(Shape::Rectangle(Rectangle {
-    		x: 520.0,
-    		y: 570.0,
-    		width: 300.0,
-    		height: 300.0,
-		}), DARK_BLUE);
+		m.fill(
+			Shape::Rectangle(Rectangle {
+				x:      200.0,
+				y:      250.0,
+				width:  300.0,
+				height: 300.0,
+			}),
+			RED,
+		);
+		m.fill(
+			Shape::Rectangle(Rectangle {
+				x:      520.0,
+				y:      250.0,
+				width:  300.0,
+				height: 300.0,
+			}),
+			YELLOW,
+		);
+		m.fill(
+			Shape::Rectangle(Rectangle {
+				x:      200.0,
+				y:      570.0,
+				width:  300.0,
+				height: 300.0,
+			}),
+			LIGHT_BLUE,
+		);
+		m.fill(
+			Shape::Rectangle(Rectangle {
+				x:      520.0,
+				y:      570.0,
+				width:  300.0,
+				height: 300.0,
+			}),
+			DARK_BLUE,
+		);
 
 		let mut target = frame.as_target();
 		f.draw(&mut target);

@@ -1,4 +1,7 @@
-use coffee::{Timer, Game, load::{Task, Join}};
+use coffee::{
+	Timer, Game,
+	load::{Task, Join},
+};
 use coffee::graphics::{Frame, Window};
 use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
 use coffee::graphics::Font;
@@ -51,7 +54,6 @@ impl Action {
 	}
 }
 
-
 #[derive(Debug, Clone)]
 pub enum Screen {
 	//Menu(Menu),
@@ -71,7 +73,7 @@ impl Screen {
 	 */
 	pub fn menu() -> Screen {
 		Screen::Menu {
-			buttons: Arc::new(vec![
+			buttons:  Arc::new(vec![
 				("play game".into(), Action::ChangeScreen(Screen::play())),
 				("read story".into(), Action::ChangeScreen(Screen::read_story())),
 				("options".into(), Action::ChangeScreen(Screen::options())),
@@ -181,7 +183,6 @@ pub trait Minigame {
 	fn interact(&mut self, input: &mut KeyboardAndMouse, window: &mut Window);
 }
 
-
 pub struct Heaven {
 	pub event_tree: Tree,
 	pub minigames:  HashMap<&'static str, Box<dyn Minigame>>,
@@ -213,9 +214,15 @@ impl Game for Heaven {
 	type LoadingScreen = ();
 
 	fn load(_window: &Window) -> Task<Heaven> {
-		(Font::load_from_bytes(include_bytes!("./ProFontExtended.ttf")), Task::succeed(|| Heaven::new()))
+		(
+			Font::load_from_bytes(include_bytes!("./ProFontExtended.ttf")),
+			Task::succeed(Heaven::new),
+		)
 			.join()
-			.map(|(font, mut heaven)| { heaven.fonts.insert("ProFontExtended", font); heaven })
+			.map(|(font, mut heaven)| {
+				heaven.fonts.insert("ProFontExtended", font);
+				heaven
+			})
 	}
 
 	fn interact(&mut self, input: &mut Self::Input, window: &mut Window) {
