@@ -6,6 +6,8 @@ pub static RED: Color = Color::from_rgb(156, 16, 16);
 pub static LIGHT_BLUE: Color = Color::from_rgb(120, 158, 255);
 pub static DARK_BLUE: Color = Color::from_rgb(0, 27, 97);
 pub static YELLOW: Color = Color::from_rgb(251, 255, 135);
+pub static BLACK: Color = Color::from_rgb(0, 0, 0);
+pub static WHITE: Color = Color::from_rgb(255, 255, 255);
 
 #[derive(Debug, Clone)]
 pub struct Label<'a> {
