@@ -1,6 +1,6 @@
 use coffee::{
 	Timer, Game,
-	load::{Task, Join},
+	load::{Task, Join, loading_screen::ProgressBar},
 };
 use coffee::graphics::{Frame, Window};
 use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
@@ -108,7 +108,7 @@ impl Screen {
 		match h.screen {
 			Screen::Menu { .. } => Menu::from_heaven(h).interact(h, input, window),
 			Screen::Play { .. } => Play::from_heaven(h).interact(h, input, window),
-			Screen::About  => About::from_heaven(h).interact(h, input, window),
+			Screen::About => About::from_heaven(h).interact(h, input, window),
 			Screen::Options => Options::from_heaven(h).interact(h, input, window),
 			Screen::ReadStory => ReadStory::from_heaven(h).interact(h, input, window),
 			_ => Ok(()),
@@ -172,16 +172,18 @@ impl Heaven {
 
 impl Game for Heaven {
 	type Input = KeyboardAndMouse;
-	type LoadingScreen = ();
+	type LoadingScreen = ProgressBar;
 
 	fn load(_window: &Window) -> Task<Heaven> {
 		(
-			Font::load_from_bytes(include_bytes!("./ProFontExtended.ttf")),
+			Font::load_from_bytes(include_bytes!("../fonts/ProFontExtended.ttf")),
+			Font::load_from_bytes(include_bytes!("../fonts/Bagnard.ttf")),
 			Task::succeed(Heaven::new),
 		)
 			.join()
-			.map(|(font, mut heaven)| {
-				heaven.fonts.insert("ProFontExtended", font);
+			.map(|(profont, bagnard, mut heaven)| {
+				heaven.fonts.insert("ProFontExtended", profont);
+				heaven.fonts.insert("Bagnard", bagnard);
 				heaven
 			})
 	}
