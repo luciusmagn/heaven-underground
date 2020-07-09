@@ -7,7 +7,7 @@ use either::Either;
 
 use std::sync::Arc;
 
-use crate::text::{Label, WHITE};
+use crate::text::{Label, WHITE, RED};
 use crate::state::{Action, Heaven};
 
 pub type Node = Either<Arc<Event>, Action>;
@@ -42,6 +42,25 @@ impl Event {
 						.color(WHITE)
 						.as_text(),
 				);
+				bagnard.add(
+					Label::new()
+						.content(&line2)
+						.position(Point::new(100.0, 860.0))
+						.size(50.0)
+						.bounds((500.0, 500.0))
+						.color(WHITE)
+						.as_text(),
+				);
+				bagnard.add(
+					Label::new()
+						.content(&line3)
+						.position(Point::new(100.0, 920.0))
+						.size(50.0)
+						.bounds((500.0, 500.0))
+						.color(RED)
+						.as_text(),
+				);
+
 
 				let mut target = frame.as_target();
 				bagnard.draw(&mut target);
@@ -82,6 +101,23 @@ impl Event {
 		input: &mut KeyboardAndMouse,
 		window: &mut Window,
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
+		use Event::*;
+		let kb = input.keyboard();
+
+		match &heaven.event_tree.events[heaven.event_tree.position] {
+			TimeScreen(_, next) => {
+
+			},
+			Text(_, next) => {
+
+			},
+			Choice(_, (_, first), (_, second)) => {
+
+			},
+			End => {
+
+			},
+		}
 		Ok(())
 	}
 

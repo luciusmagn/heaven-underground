@@ -29,7 +29,7 @@ impl Menu {
 
 		f.add(
 			Label::new()
-				.content("the heaven\n underground")
+				.content("the heaven underground")
 				.position(Point::new(600.0, 500.0))
 				.bounds((800.0, 500.0))
 				.size(60.0)

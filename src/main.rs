@@ -8,6 +8,7 @@ use state::Heaven;
 
 pub mod text;
 pub mod event;
+pub mod input;
 pub mod screens;
 
 fn main() -> Result<()> {
