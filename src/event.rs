@@ -40,18 +40,14 @@ impl Event {
 						.size(50.0)
 						.bounds((500.0, 500.0))
 						.color(WHITE)
-						.as_text()
+						.as_text(),
 				);
 
 				let mut target = frame.as_target();
 				bagnard.draw(&mut target);
-			},
-			Text(text, _) => {
-
-			},
-			Choice(text, (first, _), (second, _)) => {
-
-			},
+			}
+			Text(text, _) => {}
+			Choice(text, (first, _), (second, _)) => {}
 			End => {
 				let profont = &mut heaven.fonts.get_mut("ProFontExtended").unwrap();
 
@@ -77,9 +73,8 @@ impl Event {
 
 				let mut target = frame.as_target();
 				profont.draw(&mut target);
-			},
+			}
 		}
-
 	}
 
 	pub fn interact(
@@ -94,19 +89,19 @@ impl Event {
 }
 
 pub struct Tree {
-	pub path:     Vec<usize>,
+	pub path:            Vec<usize>,
 	//	pub minigame_results: Vec<String>,
-	pub events:   Vec<Event>,
-	pub position: usize,
+	pub events:          Vec<Event>,
+	pub position:        usize,
 	pub selected_choice: usize,
 }
 
 impl Tree {
 	pub fn new() -> Self {
 		Self {
-			path:     vec![],
+			path:            vec![],
 			//			minigame_results: vec![],
-			events:   {
+			events:          {
 				let mut v = Vec::new();
 
 				v.push(Event::TimeScreen(
@@ -179,7 +174,7 @@ impl Tree {
 
 				v
 			},
-			position: 0,
+			position:        0,
 			selected_choice: 0,
 		}
 	}
