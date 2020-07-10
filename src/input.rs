@@ -36,7 +36,7 @@ impl<T: KeyInput> KeyInput for Held<T> {
 	fn resolve(&self, keyman: &KeyTuple, heaven: &mut Heaven) {
 		let Held(code, fun, next) = self;
 
-		if keyman.0.is_key_pressed(*code) && keyman.1.contains(&code) {
+		if keyman.1.contains(&code) {
 			fun(heaven);
 		}
 
