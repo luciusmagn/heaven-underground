@@ -4,8 +4,20 @@ use coffee::graphics::{Frame, Window, Color, Point, Mesh, Shape, Rectangle};
 
 use crate::text::{Label, RED, YELLOW, LIGHT_BLUE, DARK_BLUE};
 use crate::state::{Screen, Heaven};
+use crate::input::{KeyMan, P};
+
+use std::sync::Mutex;
 
 pub struct ReadStory;
+
+lazy_static! {
+	static ref INPUT: Mutex<KeyMan<P<()>>> =
+		Mutex::new(KeyMan::<()>::new().pressed(KeyCode::Back, |heaven| {
+			heaven.screen = Screen::menu();
+			heaven.screen_data.menu_selected = 1;
+		}));
+}
+
 impl ReadStory {
 	pub fn render(heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
 		frame.clear(Color::BLACK);
@@ -69,11 +81,8 @@ impl ReadStory {
 		_window: &mut Window,
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
 		let kb = input.keyboard();
-
-		if kb.is_key_pressed(KeyCode::Back) {
-			heaven.screen = Screen::menu();
-			heaven.screen_data.menu_selected = 1;
-		}
+		let mut input = INPUT.lock()?;
+		input.execute(&kb, heaven);
 
 		Ok(())
 	}

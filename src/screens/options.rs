@@ -3,9 +3,21 @@ use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
 use coffee::graphics::{Frame, Window, Color, Point};
 
 use crate::text::Label;
+use crate::input::{KeyMan, P};
 use crate::state::{Screen, Heaven};
 
+use std::sync::Mutex;
+
 pub struct Options;
+
+lazy_static! {
+	static ref INPUT: Mutex<KeyMan<P<()>>> =
+		Mutex::new(KeyMan::<()>::new().pressed(KeyCode::Back, |heaven| {
+			heaven.screen = Screen::menu();
+			heaven.screen_data.menu_selected = 2;
+		}));
+}
+
 impl Options {
 	pub fn from_heaven(heaven: &Heaven) -> Options {
 		if let Screen::Options = heaven.screen {
@@ -39,11 +51,8 @@ impl Options {
 		_window: &mut Window,
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
 		let kb = input.keyboard();
-
-		if kb.is_key_pressed(KeyCode::Back) {
-			heaven.screen = Screen::menu();
-			heaven.screen_data.menu_selected = 2;
-		}
+		let mut input = INPUT.lock()?;
+		input.execute(&kb, heaven);
 
 		Ok(())
 	}

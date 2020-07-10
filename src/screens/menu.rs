@@ -9,9 +9,6 @@ use crate::input::{KeyMan, P};
 use std::cmp;
 use std::sync::Mutex;
 
-#[derive(Clone, Debug)]
-pub struct Menu;
-
 lazy_static! {
 	static ref INPUT: Mutex<KeyMan<P<P<P<()>>>>> = Mutex::new(KeyMan::<()>::new()
 		.pressed(KeyCode::Down, |heaven| {
@@ -39,6 +36,8 @@ lazy_static! {
 			let _ = buttons[selected].1.execute(heaven); // TODO do something with this Result
 		}));
 }
+
+pub struct Menu;
 
 impl Menu {
 	pub fn render(heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
