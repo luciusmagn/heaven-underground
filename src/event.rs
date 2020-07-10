@@ -61,7 +61,6 @@ impl Event {
 						.as_text(),
 				);
 
-
 				let mut target = frame.as_target();
 				bagnard.draw(&mut target);
 			}
@@ -105,18 +104,10 @@ impl Event {
 		let kb = input.keyboard();
 
 		match &heaven.event_tree.events[heaven.event_tree.position] {
-			TimeScreen(_, next) => {
-
-			},
-			Text(_, next) => {
-
-			},
-			Choice(_, (_, first), (_, second)) => {
-
-			},
-			End => {
-
-			},
+			TimeScreen(_, next) => {}
+			Text(_, next) => {}
+			Choice(_, (_, first), (_, second)) => {}
+			End => {}
 		}
 		Ok(())
 	}

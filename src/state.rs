@@ -59,10 +59,10 @@ pub enum Screen {
 
 #[derive(Debug, Clone)]
 pub struct ScreenData {
-	pub menu_buttons: Arc<Vec<(String, Action)>>,
+	pub menu_buttons:  Arc<Vec<(String, Action)>>,
 	pub menu_selected: usize,
-	pub cutscene: String,
-	pub minigame: String,
+	pub cutscene:      String,
+	pub minigame:      String,
 }
 
 impl Screen {
@@ -127,28 +127,28 @@ pub trait Minigame {
 }
 
 pub struct Heaven {
-	pub event_tree: Tree,
-	pub minigames:  HashMap<&'static str, Box<dyn Minigame>>,
-	pub tick_count: u64,
-	pub quit_state: bool,
-	pub held_keys:  Vec<KeyCode>,
-	pub fonts:      HashMap<&'static str, Font>,
-	pub sprites:    HashMap<&'static str, Vec<u8>>,
-	pub screen:     Screen,
-	pub screen_data:ScreenData,
+	pub event_tree:  Tree,
+	pub minigames:   HashMap<&'static str, Box<dyn Minigame>>,
+	pub tick_count:  u64,
+	pub quit_state:  bool,
+	pub held_keys:   Vec<KeyCode>,
+	pub fonts:       HashMap<&'static str, Font>,
+	pub sprites:     HashMap<&'static str, Vec<u8>>,
+	pub screen:      Screen,
+	pub screen_data: ScreenData,
 }
 
 impl Heaven {
 	pub fn new() -> Self {
 		Self {
-			minigames:  HashMap::new(),
-			event_tree: Tree::new(),
-			sprites:    HashMap::new(),
-			quit_state: false,
-			held_keys:  vec![],
-			tick_count: 0,
-			fonts:      HashMap::new(),
-			screen:     Screen::menu(),
+			minigames:   HashMap::new(),
+			event_tree:  Tree::new(),
+			sprites:     HashMap::new(),
+			quit_state:  false,
+			held_keys:   vec![],
+			tick_count:  0,
+			fonts:       HashMap::new(),
+			screen:      Screen::menu(),
 			screen_data: ScreenData {
 				menu_buttons:  Arc::new(vec![
 					("play game".into(), Action::ChangeScreen(Screen::play())),
@@ -163,9 +163,9 @@ impl Heaven {
 					),
 				]),
 				menu_selected: 0,
-				cutscene: String::new(),
-				minigame: String::new(),
-			}
+				cutscene:      String::new(),
+				minigame:      String::new(),
+			},
 		}
 	}
 }

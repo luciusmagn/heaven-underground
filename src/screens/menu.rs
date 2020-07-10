@@ -3,11 +3,11 @@ use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
 use coffee::graphics::{Frame, Window, Color, Point};
 
 use crate::text::Label;
-use crate::state::{Screen, Action, Heaven};
-use crate::input::{KeyMan, P, H, R, KeyInput};
+use crate::state::Heaven;
+use crate::input::{KeyMan, P};
 
 use std::cmp;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 #[derive(Clone, Debug)]
 pub struct Menu;
@@ -55,8 +55,11 @@ impl Menu {
 		);
 
 		for (i, (name, _)) in heaven.screen_data.menu_buttons.iter().enumerate() {
-			let content =
-				if i == heaven.screen_data.menu_selected { format!("> {}", name) } else { name.into() };
+			let content = if i == heaven.screen_data.menu_selected {
+				format!("> {}", name)
+			} else {
+				name.into()
+			};
 
 			f.add(
 				Label::new()

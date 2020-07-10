@@ -22,7 +22,7 @@ impl KeyInput for () {
 
 impl<T: KeyInput> KeyInput for Pressed<T> {
 	fn resolve(&self, keyman: &KeyTuple, heaven: &mut Heaven) {
-		let Pressed (code, fun, next) = self;
+		let Pressed(code, fun, next) = self;
 
 		if keyman.0.is_key_pressed(*code) && !keyman.1.contains(&code) {
 			fun(heaven);
@@ -34,7 +34,7 @@ impl<T: KeyInput> KeyInput for Pressed<T> {
 
 impl<T: KeyInput> KeyInput for Held<T> {
 	fn resolve(&self, keyman: &KeyTuple, heaven: &mut Heaven) {
-		let Held (code, fun, next) = self;
+		let Held(code, fun, next) = self;
 
 		if keyman.0.is_key_pressed(*code) && keyman.1.contains(&code) {
 			fun(heaven);
@@ -46,7 +46,7 @@ impl<T: KeyInput> KeyInput for Held<T> {
 
 impl<T: KeyInput> KeyInput for Released<T> {
 	fn resolve(&self, keyman: &KeyTuple, heaven: &mut Heaven) {
-		let Released (code, fun, next) = self;
+		let Released(code, fun, next) = self;
 
 		if keyman.0.was_key_released(*code) {
 			fun(heaven);
@@ -57,8 +57,10 @@ impl<T: KeyInput> KeyInput for Released<T> {
 }
 
 impl<T> KeyMan<T>
-	where T: KeyInput,
+where
+	T: KeyInput,
 {
+	#[allow(clippy::new_ret_no_self)]
 	pub const fn new() -> KeyMan<()> {
 		KeyMan(vec![], ())
 	}
@@ -75,13 +77,17 @@ impl<T> KeyMan<T>
 		KeyMan(keys, Held(key, fun, next))
 	}
 
-	pub fn released(self, key: KeyCode, fun: fn(&mut Heaven) -> ()) -> KeyMan<Released<T>> {
+	pub fn released(
+		self,
+		key: KeyCode,
+		fun: fn(&mut Heaven) -> (),
+	) -> KeyMan<Released<T>> {
 		let KeyMan(keys, next) = self;
 
 		KeyMan(keys, Released(key, fun, next))
 	}
 
-	pub fn execute(&mut self, kb: &Keyboard, heaven: &mut Heaven) -> () {
+	pub fn execute(&mut self, kb: &Keyboard, heaven: &mut Heaven) {
 		let keys = &mut self.0;
 		let tuple: KeyTuple = KeyTuple(kb, keys);
 
@@ -97,23 +103,26 @@ impl<T> KeyMan<T>
 	}
 }
 
-lazy_static! {
-	static ref INPUT: KeyMan<R<H<P<()>>>>	= {
-		let	keys = KeyMan::<()>::new();
+#[cfg(test)]
+mod examples {
+	lazy_static! {
+		static ref INPUT: KeyMan<R<H<P<()>>>> = {
+			let keys = KeyMan::<()>::new();
+			keys.pressed(KeyCode::A, |_| ())
+				.held(KeyCode::A, |_| ())
+				.released(KeyCode::A, |_| ())
+		};
+	}
+
+	#[allow(invalid_value)]
+	pub fn compose_test() {
+		let keys = KeyMan::<()>::new();
+		let kb: Keyboard = unsafe { std::mem::zeroed() };
+		let mut h: Heaven = unsafe { std::mem::zeroed() };
+
 		keys.pressed(KeyCode::A, |_| ())
 			.held(KeyCode::A, |_| ())
 			.released(KeyCode::A, |_| ())
-    };
-}
-
-#[allow(invalid_value)]
-pub fn compose_test() {
-	let keys = KeyMan::<()>::new();
-	let kb: Keyboard = unsafe { std::mem::zeroed() };
-	let mut h: Heaven = unsafe { std::mem::zeroed() };
-
-	keys.pressed(KeyCode::A, |_| ())
-		.held(KeyCode::A, |_| ())
-		.released(KeyCode::A, |_| ())
-		.execute(&kb, &mut h);
+			.execute(&kb, &mut h);
+	}
 }
