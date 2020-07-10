@@ -703,6 +703,7 @@ version = "0.1.0"
 dependencies = [
  "coffee",
  "either",
+ "lazy_static",
 ]
 
 [[package]]

@@ -7,15 +7,7 @@ use crate::state::{Screen, Heaven};
 
 pub struct ReadStory;
 impl ReadStory {
-	pub fn from_heaven(heaven: &Heaven) -> ReadStory {
-		if let Screen::ReadStory = heaven.screen {
-			ReadStory
-		} else {
-			unreachable!("you are retarded")
-		}
-	}
-
-	pub fn render(&self, heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
+	pub fn render(heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
 		frame.clear(Color::BLACK);
 		let f = &mut heaven.fonts.get_mut("ProFontExtended").unwrap();
 
@@ -72,7 +64,6 @@ impl ReadStory {
 	}
 
 	pub fn interact(
-		self,
 		heaven: &mut Heaven,
 		input: &mut KeyboardAndMouse,
 		_window: &mut Window,
@@ -81,7 +72,7 @@ impl ReadStory {
 
 		if kb.is_key_pressed(KeyCode::Back) {
 			heaven.screen = Screen::menu();
-			*heaven.screen.selected().unwrap() = 1;
+			heaven.screen_data.menu_selected = 1;
 		}
 
 		Ok(())

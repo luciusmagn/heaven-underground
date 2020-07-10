@@ -47,15 +47,22 @@ impl Action {
 
 #[derive(Debug, Clone)]
 pub enum Screen {
-	//Menu(Menu),
-	Menu { buttons: Arc<Vec<(String, Action)>>, selected: usize },
+	Menu,
 	About,
 	ReadStory,
-	Options, //?
+	Options,
 	Quit,
 	Play,
-	PlayCutscene(String),
-	PlayMinigame(String),
+	PlayCutscene,
+	PlayMinigame,
+}
+
+#[derive(Debug, Clone)]
+pub struct ScreenData {
+	pub menu_buttons: Arc<Vec<(String, Action)>>,
+	pub menu_selected: usize,
+	pub cutscene: String,
+	pub minigame: String,
 }
 
 impl Screen {
@@ -63,21 +70,7 @@ impl Screen {
 	 ** I N I T I A L I Z E R S
 	 */
 	pub fn menu() -> Screen {
-		Screen::Menu {
-			buttons:  Arc::new(vec![
-				("play game".into(), Action::ChangeScreen(Screen::play())),
-				("read story".into(), Action::ChangeScreen(Screen::read_story())),
-				("options".into(), Action::ChangeScreen(Screen::options())),
-				("about".into(), Action::ChangeScreen(Screen::about())),
-				(
-					"quit".into(),
-					Action::MutateState(Box::new(|game: &mut Heaven| {
-						Ok(game.quit_state = true)
-					})),
-				),
-			]),
-			selected: 0,
-		}
+		Screen::Menu
 	}
 
 	pub fn play() -> Screen {
@@ -106,34 +99,23 @@ impl Screen {
 		window: &mut Window,
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
 		match h.screen {
-			Screen::Menu { .. } => Menu::from_heaven(h).interact(h, input, window),
-			Screen::Play { .. } => Play::from_heaven(h).interact(h, input, window),
+			Screen::Menu => Menu::interact(h, input, window),
+			Screen::Play => Play::from_heaven(h).interact(h, input, window),
 			Screen::About => About::from_heaven(h).interact(h, input, window),
 			Screen::Options => Options::from_heaven(h).interact(h, input, window),
-			Screen::ReadStory => ReadStory::from_heaven(h).interact(h, input, window),
+			Screen::ReadStory => ReadStory::interact(h, input, window),
 			_ => Ok(()),
 		}
 	}
 
 	fn render(h: &mut Heaven, frame: &mut Frame, timer: &Timer) {
 		match h.screen {
-			Screen::Menu { .. } => Menu::from_heaven(h).render(h, frame, timer),
-			Screen::Play { .. } => Play::from_heaven(h).render(h, frame, timer),
+			Screen::Menu => Menu::render(h, frame, timer),
+			Screen::Play => Play::from_heaven(h).render(h, frame, timer),
 			Screen::About => About::from_heaven(h).render(h, frame, timer),
 			Screen::Options => Options::from_heaven(h).render(h, frame, timer),
-			Screen::ReadStory => ReadStory::from_heaven(h).render(h, frame, timer),
+			Screen::ReadStory => ReadStory::render(h, frame, timer),
 			_ => (),
-		}
-	}
-
-	/*
-		** U T I L S
-		*/
-	pub fn selected(&mut self) -> Option<&mut usize> {
-		if let Screen::Menu { buttons: _, selected } = self {
-			Some(selected)
-		} else {
-			None
 		}
 	}
 }
@@ -153,6 +135,7 @@ pub struct Heaven {
 	pub fonts:      HashMap<&'static str, Font>,
 	pub sprites:    HashMap<&'static str, Vec<u8>>,
 	pub screen:     Screen,
+	pub screen_data:ScreenData,
 }
 
 impl Heaven {
@@ -160,12 +143,29 @@ impl Heaven {
 		Self {
 			minigames:  HashMap::new(),
 			event_tree: Tree::new(),
-			screen:     Screen::menu(),
 			sprites:    HashMap::new(),
 			quit_state: false,
 			held_keys:  vec![],
 			tick_count: 0,
 			fonts:      HashMap::new(),
+			screen:     Screen::menu(),
+			screen_data: ScreenData {
+				menu_buttons:  Arc::new(vec![
+					("play game".into(), Action::ChangeScreen(Screen::play())),
+					("read story".into(), Action::ChangeScreen(Screen::read_story())),
+					("options".into(), Action::ChangeScreen(Screen::options())),
+					("about".into(), Action::ChangeScreen(Screen::about())),
+					(
+						"quit".into(),
+						Action::MutateState(Box::new(|game: &mut Heaven| {
+							Ok(game.quit_state = true)
+						})),
+					),
+				]),
+				menu_selected: 0,
+				cutscene: String::new(),
+				minigame: String::new(),
+			}
 		}
 	}
 }

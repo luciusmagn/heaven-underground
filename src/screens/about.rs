@@ -42,7 +42,7 @@ impl About {
 
 		if kb.is_key_pressed(KeyCode::Back) {
 			heaven.screen = Screen::menu();
-			*heaven.screen.selected().unwrap() = 3;
+			heaven.screen_data.menu_selected = 3;
 		}
 
 		Ok(())

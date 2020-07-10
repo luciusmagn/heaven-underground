@@ -4,26 +4,44 @@ use coffee::graphics::{Frame, Window, Color, Point};
 
 use crate::text::Label;
 use crate::state::{Screen, Action, Heaven};
+use crate::input::{KeyMan, P, H, R, KeyInput};
 
 use std::cmp;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug)]
-pub struct Menu {
-	buttons:  Arc<Vec<(String, Action)>>,
-	selected: usize,
+pub struct Menu;
+
+lazy_static! {
+	static ref INPUT: Mutex<KeyMan<P<P<P<()>>>>> = Mutex::new(KeyMan::<()>::new()
+		.pressed(KeyCode::Down, |heaven| {
+			let selected = &mut heaven.screen_data.menu_selected;
+			let buttons = &mut heaven.screen_data.menu_buttons;
+			if *selected + 1 == buttons.len() {
+				*selected = 0;
+			} else {
+				*selected = cmp::min(*selected + 1, buttons.len() - 1);
+			}
+		})
+		.pressed(KeyCode::Up, |heaven| {
+			let selected = &mut heaven.screen_data.menu_selected;
+			let buttons = &mut heaven.screen_data.menu_buttons;
+			let (num, overflowed) = selected.overflowing_sub(1);
+			if !overflowed {
+				*selected = cmp::max(num, 0);
+			} else {
+				*selected = buttons.len() - 1;
+			}
+		})
+		.pressed(KeyCode::Return, |heaven| {
+			let selected = heaven.screen_data.menu_selected;
+			let buttons = heaven.screen_data.menu_buttons.clone();
+			let _ = buttons[selected].1.execute(heaven); // TODO do something with this Result
+		}));
 }
 
 impl Menu {
-	pub fn from_heaven(heaven: &Heaven) -> Menu {
-		if let Screen::Menu { buttons, selected } = &heaven.screen {
-			Menu { buttons: buttons.clone(), selected: *selected }
-		} else {
-			unreachable!("you are retarded")
-		}
-	}
-
-	pub fn render(&self, heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
+	pub fn render(heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
 		frame.clear(Color::BLACK);
 		let f = &mut heaven.fonts.get_mut("ProFontExtended").unwrap();
 
@@ -36,16 +54,16 @@ impl Menu {
 				.as_text(),
 		);
 
-		for (i, (name, _)) in self.buttons.iter().enumerate() {
+		for (i, (name, _)) in heaven.screen_data.menu_buttons.iter().enumerate() {
 			let content =
-				if i == self.selected { format!("> {}", name) } else { name.into() };
+				if i == heaven.screen_data.menu_selected { format!("> {}", name) } else { name.into() };
 
 			f.add(
 				Label::new()
 					.content(&content)
 					.position(Point::new(950.0, 600.0 + (i as f32) * 60.0))
 					.size(40.0)
-					.color(if i == self.selected {
+					.color(if i == heaven.screen_data.menu_selected {
 						Color::WHITE
 					} else {
 						crate::text::RED
@@ -58,43 +76,14 @@ impl Menu {
 	}
 
 	pub fn interact(
-		&self,
 		heaven: &mut Heaven,
 		input: &mut KeyboardAndMouse,
 		_window: &mut Window,
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
-		let selected = heaven.screen.selected().unwrap();
 		let kb = input.keyboard();
+		let mut input = INPUT.lock()?;
+		input.execute(&kb, heaven);
 
-		if kb.is_key_pressed(KeyCode::Down) && !heaven.held_keys.contains(&KeyCode::Down)
-		{
-			if self.selected + 1 == self.buttons.len() {
-				*selected = 0;
-			} else {
-				*selected = cmp::min(self.selected + 1, self.buttons.len() - 1);
-			}
-			heaven.held_keys.push(KeyCode::Down);
-		}
-		if kb.is_key_pressed(KeyCode::Up) && !heaven.held_keys.contains(&KeyCode::Up) {
-			let (num, overflowed) = self.selected.overflowing_sub(1);
-			if !overflowed {
-				*selected = cmp::max(num, 0);
-			} else {
-				*selected = self.buttons.len() - 1;
-			}
-			heaven.held_keys.push(KeyCode::Up);
-		}
-
-		if kb.was_key_released(KeyCode::Down) {
-			heaven.held_keys.retain(|x| x != &KeyCode::Down);
-		}
-		if kb.was_key_released(KeyCode::Up) {
-			heaven.held_keys.retain(|x| x != &KeyCode::Up);
-		}
-
-		if kb.is_key_pressed(KeyCode::Return) {
-			return self.buttons[self.selected].1.execute(heaven);
-		}
 		Ok(())
 	}
 }
