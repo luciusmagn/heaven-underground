@@ -86,4 +86,6 @@ impl ReadStory {
 
 		Ok(())
 	}
+
+	pub fn update(_: &mut Heaven, _: &Window) {}
 }

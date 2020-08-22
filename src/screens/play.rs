@@ -1,6 +1,6 @@
 use coffee::Timer;
 use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
-use coffee::graphics::{Frame, Window, Color};
+use coffee::graphics::{Frame, Window};
 
 use crate::event::Event;
 use crate::state::{Screen, Heaven};
@@ -15,16 +15,14 @@ impl Play {
 		}
 	}
 
-	pub fn render(&self, heaven: &mut Heaven, frame: &mut Frame, timer: &Timer) {
-		frame.clear(Color::BLACK);
+	pub fn render(heaven: &mut Heaven, frame: &mut Frame, timer: &Timer) {
 		Event::render(heaven, frame, timer)
 	}
 
 	pub fn interact(
-		self,
 		heaven: &mut Heaven,
 		input: &mut KeyboardAndMouse,
-		_window: &mut Window,
+		window: &mut Window,
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
 		let kb = input.keyboard();
 
@@ -32,6 +30,12 @@ impl Play {
 			heaven.screen = Screen::menu();
 		}
 
+		let _ = Event::interact(heaven, input, window); // TODO
+
 		Ok(())
+	}
+
+	pub fn update(heaven: &mut Heaven, window: &Window) {
+		Event::update(heaven, window)
 	}
 }

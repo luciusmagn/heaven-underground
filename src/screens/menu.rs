@@ -88,4 +88,6 @@ impl Menu {
 
 		Ok(())
 	}
+
+	pub fn update(_: &mut Heaven, _: &Window) {}
 }

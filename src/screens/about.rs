@@ -27,7 +27,7 @@ impl About {
 		}
 	}
 
-	pub fn render(&self, heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
+	pub fn render(heaven: &mut Heaven, frame: &mut Frame, _timer: &Timer) {
 		frame.clear(Color::BLACK);
 		let f = &mut heaven.fonts.get_mut("ProFontExtended").unwrap();
 
@@ -45,7 +45,6 @@ impl About {
 	}
 
 	pub fn interact(
-		self,
 		heaven: &mut Heaven,
 		input: &mut KeyboardAndMouse,
 		_window: &mut Window,
@@ -56,4 +55,6 @@ impl About {
 
 		Ok(())
 	}
+
+	pub fn update(_: &mut Heaven, _: &Window) {}
 }

@@ -3,6 +3,8 @@
 
 #[macro_use]
 extern crate lazy_static;
+extern crate rand;
+extern crate coffee;
 
 use coffee::{Game, Result, graphics::WindowSettings};
 

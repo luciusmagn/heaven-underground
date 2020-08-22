@@ -2,7 +2,7 @@ use coffee::{
 	Timer, Game,
 	load::{Task, Join, loading_screen::ProgressBar},
 };
-use coffee::graphics::{Frame, Window};
+use coffee::graphics::{Frame, Window, CursorIcon};
 use coffee::input::{KeyboardAndMouse, keyboard::KeyCode};
 use coffee::graphics::Font;
 
@@ -100,9 +100,9 @@ impl Screen {
 	) -> Result<(), Box<dyn std::error::Error + 'static>> {
 		match h.screen {
 			Screen::Menu => Menu::interact(h, input, window),
-			Screen::Play => Play::from_heaven(h).interact(h, input, window),
-			Screen::About => About::from_heaven(h).interact(h, input, window),
-			Screen::Options => Options::from_heaven(h).interact(h, input, window),
+			Screen::Play => Play::interact(h, input, window),
+			Screen::About => About::interact(h, input, window),
+			Screen::Options => Options::interact(h, input, window),
 			Screen::ReadStory => ReadStory::interact(h, input, window),
 			_ => Ok(()),
 		}
@@ -111,10 +111,21 @@ impl Screen {
 	fn render(h: &mut Heaven, frame: &mut Frame, timer: &Timer) {
 		match h.screen {
 			Screen::Menu => Menu::render(h, frame, timer),
-			Screen::Play => Play::from_heaven(h).render(h, frame, timer),
-			Screen::About => About::from_heaven(h).render(h, frame, timer),
-			Screen::Options => Options::from_heaven(h).render(h, frame, timer),
+			Screen::Play => Play::render(h, frame, timer),
+			Screen::About => About::render(h, frame, timer),
+			Screen::Options => Options::render(h, frame, timer),
 			Screen::ReadStory => ReadStory::render(h, frame, timer),
+			_ => (),
+		}
+	}
+
+	fn update(h: &mut Heaven, window: &Window) {
+		match h.screen {
+			Screen::Menu => Menu::update(h, window),
+			Screen::Play => Play::update(h, window),
+			Screen::About => About::update(h, window),
+			Screen::Options => Options::update(h, window),
+			Screen::ReadStory => ReadStory::update(h, window),
 			_ => (),
 		}
 	}
@@ -194,7 +205,9 @@ impl Game for Heaven {
 		}
 	}
 
-	fn update(&mut self, _window: &Window) {}
+	fn update(&mut self, window: &Window) {
+		Screen::update(self, window)
+	}
 
 	fn draw(&mut self, frame: &mut Frame, timer: &Timer) {
 		Screen::render(self, frame, timer)
@@ -202,5 +215,9 @@ impl Game for Heaven {
 
 	fn is_finished(&self) -> bool {
 		self.quit_state
+	}
+
+	fn cursor_icon(&self) -> CursorIcon {
+		CursorIcon::Hidden
 	}
 }
